@@ -1,4 +1,7 @@
-class CarCube extends Shape {
+import { defs, tiny } from '../examples/common.js';
+const { vec, vec3, vec4, color, Mat4, Material, Shape } = tiny;
+
+export class CarCube extends Shape {
     constructor() {
         super("position", "normal", "texture_coord");
         this.arrays.position = [
@@ -59,25 +62,25 @@ class CarCube extends Shape {
     }
 }
 
-class Car {
+export class Car {
     constructor() {
         this.body = new CarCube(); // The main body of the car
     }
 
     // Function to draw the car using the provided context and graphics state
     draw(context, graphics_state) {
-        // The transformation that scales the cube into the car's body dimensions
-        // Assuming the cube is 1x1x1, we want to scale it to 2x2x3
+        // Car body size: 2x2x3 units (WxHxL)
+        // Wheel diameter: 0.5 units, clearance: 0.1 units
+        // Lift the car body by half the wheel's diameter plus clearance
+        let lift_height = 0.5 / 2 + 0.1;
+
+        // Create a transformation matrix for the car body
         let body_transform = Mat4.identity()
-            .times(Mat4.scale(1, 1, 1.5)); // Scale to make the length 3, width 2, and height 2
+            .times(Mat4.translation(0, lift_height, 0))  // Lift the car body up
+            .times(Mat4.scale(1, 1, 1.5)); // Scale to make the car body 2x2x3 units
 
-        // Since the body should be lifted off the ground by the wheels, translate it upwards
-        // Assuming the wheels are about 1 unit in diameter, and we want some clearance (say 0.25 units),
-        // we would lift the body by half the wheel's diameter plus the clearance.
-        body_transform = body_transform.times(Mat4.translation(0, 0.625, 0)); // Adjust Y translation as needed
-
-        // Draw the body with the transformed dimensions
-        this.body.draw(context, graphics_state, body_transform, new Material(this.shader)); 
+        // Draw the car body with the transformed dimensions and material
+        this.shapes.Car.draw(context, program_state, body_transform, material);
     }
 }
 
