@@ -14,7 +14,7 @@ export class Assignment3 extends Scene {
 
         // *** Materials
         this.materials = {
-            
+
         }
 
     }
@@ -30,5 +30,5 @@ export class Assignment3 extends Scene {
 
 
 
-}
+
 
