@@ -65,9 +65,8 @@ export class MainProgram extends Scene {
 
         const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
 
+        // temporary sun/light source
         let sun_transform = Mat4.identity();
-
-        // Sun
         const sunPosition = vec4(0,5,0,1);
         let radius = 2;
         let sunColor = color(1, 1, 1, 1);

@@ -153,6 +153,7 @@ export class Tree {
             .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
             .times(Mat4.translation(-8, 0, 0))
             .times(Mat4.scale(1, 1, 1.5))
+        // draws stump
         this.stump.draw(context, program_state, stump_transform, material.tree_stump);
         stump_transform = stump_transform
             .times(Mat4.scale(1, 1, 0.5))
@@ -160,9 +161,11 @@ export class Tree {
 
         let treeTop_transform = stump_transform
             .times(Mat4.translation(0, 2, 0));
+        // draws first box for top part of tree
         this.top.draw(context, program_state, treeTop_transform, material.tree_top)
         treeTop_transform = treeTop_transform
             .times(Mat4.translation(0, 2, 0))
+        // draws second box for top part of tree
         this.top.draw(context, program_state, treeTop_transform, material.tree_top)
 
     }

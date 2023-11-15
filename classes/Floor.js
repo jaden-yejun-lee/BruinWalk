@@ -52,6 +52,8 @@ export class Floor {
             .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
             .times(Mat4.scale(20, 20, 0.1))
         console.log('drawing floor');
+        /* scaled floor to be flat and moved it a little bit downward so other objects can
+        be placed directly on top of floor without translation */
         this.body.draw(context, program_state, floor_transform, material);
 
     }

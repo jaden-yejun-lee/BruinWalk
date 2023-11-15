@@ -45,6 +45,7 @@ export class Rock {
         this.body = new RockCube();
         this.topCube = new RockCube();
     }
+    // draws rock with little stubble on top
     draw(context, program_state, shapes, material) {
         console.log("drawing rock");
         let rock_transform = Mat4.identity();
