@@ -1,5 +1,5 @@
-import {tiny} from '../tiny-graphics.js';
-import {widgets} from '../tiny-graphics-widgets.js';
+import { tiny } from '../tiny-graphics.js';
+import { widgets } from '../tiny-graphics-widgets.js';
 // Pull these names into this module's scope for convenience:
 const {
     Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4,
@@ -10,7 +10,70 @@ Object.assign(tiny, widgets);
 
 const defs = {};
 
-export {tiny, defs};
+export { tiny, defs };
+const CarCube = defs.CarCube =
+    class CarCube extends Shape {
+        constructor() {
+            super("position", "normal", "texture_coord");
+            this.arrays.position = [
+                // Back face
+                vec3(-0.5, -0.5, -0.5), vec3(0.5, -0.5, -0.5), vec3(0.5, 0.5, -0.5), vec3(-0.5, 0.5, -0.5),
+                // Front face
+                vec3(-0.5, -0.5, 0.5), vec3(0.5, -0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(-0.5, 0.5, 0.5),
+                // Top face
+                vec3(-0.5, 0.5, -0.5), vec3(0.5, 0.5, -0.5), vec3(0.5, 0.5, 0.5), vec3(-0.5, 0.5, 0.5),
+                // Bottom face
+                vec3(-0.5, -0.5, -0.5), vec3(0.5, -0.5, -0.5), vec3(0.5, -0.5, 0.5), vec3(-0.5, -0.5, 0.5),
+                // Right face
+                vec3(0.5, -0.5, -0.5), vec3(0.5, 0.5, -0.5), vec3(0.5, 0.5, 0.5), vec3(0.5, -0.5, 0.5),
+                // Left face
+                vec3(-0.5, -0.5, -0.5), vec3(-0.5, 0.5, -0.5), vec3(-0.5, 0.5, 0.5), vec3(-0.5, -0.5, 0.5)
+            ];
+            this.arrays.normal = [
+                // Back face
+                vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1),
+                // Front face
+                vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1),
+                // Top face
+                vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0),
+                // Bottom face
+                vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0),
+                // Right face
+                vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0),
+                // Left face
+                vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0)
+            ];
+
+
+            this.arrays.texture_coord = [
+                // Back face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Front face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Top face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Bottom face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Right face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Left face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1)
+            ];
+
+
+            // Define the indices for the cube, 2 triangles per face
+            this.indices = [
+                0, 1, 2, 0, 2, 3,     // Back face
+                4, 5, 6, 4, 6, 7,     // Front face
+                8, 9, 10, 8, 10, 11,  // Top face
+                12, 13, 14, 12, 14, 15, // Bottom face
+                16, 17, 18, 16, 18, 19, // Right face
+                20, 21, 22, 20, 22, 23  // Left face
+            ];
+        }
+    }
+
+
 
 const Triangle = defs.Triangle =
     class Triangle extends Shape {
@@ -201,7 +264,7 @@ const Subdivision_Sphere = defs.Subdivision_Sphere =
                         if (tex[q[0]][0] < 0.5) {
                             this.indices[q[1]] = this.arrays.position.length;
                             this.arrays.position.push(this.arrays.position[q[0]].copy());
-                            this.arrays.normal.push(this.arrays.normal  [q[0]].copy());
+                            this.arrays.normal.push(this.arrays.normal[q[0]].copy());
                             tex.push(tex[q[0]].plus(vec(1, 0)));
                         }
                     }
@@ -350,7 +413,7 @@ const Cone_Tip = defs.Cone_Tip =
 const Torus = defs.Torus =
     class Torus extends Shape {
         // Build a donut shape.  An example of a surface of revolution.
-        constructor(rows, columns, texture_range=[[0, 1], [0, 1]]) {
+        constructor(rows, columns, texture_range = [[0, 1], [0, 1]]) {
             super("position", "normal", "texture_coord");
             const circle_points = Array(rows).fill(vec3(1 / 3, 0, 0))
                 .map((p, i, a) => Mat4.translation(-2 / 3, 0, 0)
@@ -456,9 +519,9 @@ const Minimal_Webgl_Demo = defs.Minimal_Webgl_Demo =
         constructor(webgl_manager, control_panel) {
             super(webgl_manager, control_panel);
             // Don't create any DOM elements to control this scene:
-            this.widget_options = {make_controls: false, show_explanation: false};
+            this.widget_options = { make_controls: false, show_explanation: false };
             // Send a Triangle's vertices to the GPU's buffers:
-            this.shapes = {triangle: new Minimal_Shape()};
+            this.shapes = { triangle: new Minimal_Shape() };
             this.shader = new Basic_Shader();
         }
 
@@ -710,7 +773,7 @@ const Phong_Shader = defs.Phong_Shader =
             // within this function, one data field at a time, to fully initialize the shader for a draw.
 
             // Fill in any missing fields in the Material object with custom defaults for this shader:
-            const defaults = {color: color(0, 0, 0, 1), ambient: 0, diffusivity: 1, specularity: 1, smoothness: 40};
+            const defaults = { color: color(0, 0, 0, 1), ambient: 0, diffusivity: 1, specularity: 1, smoothness: 40 };
             material = Object.assign({}, defaults, material);
 
             this.send_material(context, gpu_addresses, material);
@@ -843,7 +906,7 @@ const Movement_Controls = defs.Movement_Controls =
         add_mouse_controls(canvas) {
             // add_mouse_controls():  Attach HTML mouse events to the drawing canvas.
             // First, measure mouse steering, for rotating the flyaround camera:
-            this.mouse = {"from_center": vec(0, 0)};
+            this.mouse = { "from_center": vec(0, 0) };
             const mouse_position = (e, rect = canvas.getBoundingClientRect()) =>
                 vec(e.clientX - (rect.left + rect.right) / 2, e.clientY - (rect.bottom + rect.top) / 2);
             // Set up mouse response.  The last one stops us from reacting if the mouse leaves the canvas:

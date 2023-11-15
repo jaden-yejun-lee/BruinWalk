@@ -11,17 +11,7 @@ export class Assignment3 extends Scene {
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
-            sphere: new defs.Subdivision_Sphere(4),
-            circle: new defs.Regular_2D_Polygon(1, 15),
-            // TODO:  Fill in as many additional shape instances as needed in this key/value table.
-            //        (Requirement 1)
-            planet1: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
-            planet2: new defs.Subdivision_Sphere(3),
-            planet3: new defs.Subdivision_Sphere(4),
-            planet4: new defs.Subdivision_Sphere(4),
-            sun: new defs.Subdivision_Sphere(4),
-            ring: new defs.Torus(50, 50),
-            moon: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(1)
+            car_cube: new defs.Cube(),
 
 
         };
@@ -29,22 +19,9 @@ export class Assignment3 extends Scene {
         // *** Materials
         this.materials = {
 
-            sun: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 1, color: hex_color("#ffffff") }),
-            planet1: new Material(new defs.Phong_Shader(),
-                { ambient: 0, diffusivity: 1, color: hex_color("#808080"), specularity: 0 }),
-            planet2_gouraud: new Material(new Gouraud_Shader(),
-                { ambient: 0, diffusivity: .2, color: hex_color("#80FFFF"), specularity: 1 }),
-            planet2_phong: new Material(new defs.Phong_Shader(),
-                { ambient: 0, diffusivity: .2, color: hex_color("#80FFFF"), specularity: 1 }),
-            planet3: new Material(new defs.Phong_Shader(),
-                { ambient: 0, diffusivity: 1, color: hex_color("#B08040"), specularity: 1 }),
-            planet4: new Material(new defs.Phong_Shader(),
-                { ambient: 0, color: hex_color("#525cd1"), specularity: 1 }),
-            moon: new Material(new defs.Phong_Shader(),
-                { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
-            ring: new Material(new Ring_Shader(),
-                { ambient: 1, diffusivity: 0, color: hex_color("#B08040"), specularity: 0, smoothness: 0 }),
+            car_cube: new Material(new defs.Phong_Shader(),
+            { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
+
         }
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -71,75 +48,13 @@ export class Assignment3 extends Scene {
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
 
-
-        const currT = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
         let model_transform = Mat4.identity();
-
-        let sun_model_transform = model_transform;
-
-        let sun_rad = 1 + (1 - Math.cos(Math.PI / 10 * currT)); //might be wrong
-        sun_model_transform = sun_model_transform.times(Mat4.scale(sun_rad, sun_rad, sun_rad));
-
-        let red_white_rgb = (1 + Math.sin(2 * Math.PI / 10 * currT)) / 2;
-        let sun_col = color(1, red_white_rgb, red_white_rgb, 1);
-
-        const sunlight = vec4(0, 0, 0, 1);
-        program_state.lights = [new Light(sunlight, sun_col, 10 ** sun_rad)];
-
-        this.shapes.sun.draw(context, program_state, sun_model_transform, this.materials.sun.override({ color: sun_col }));
-
-
-
-
-
 
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
 
-        let planet1_res = model_transform;//gray, 2 subdiv, diffuse
-        planet1_res = planet1_res.times(Mat4.rotation(currT, 0, 1, 0))
-            .times(Mat4.translation(5, 0, 0));
-        this.shapes.planet1.draw(context, program_state, planet1_res, this.materials.planet1);
-
-        // Planet 2
-        let planet2_res = model_transform;
-        planet2_res = planet2_res.times(Mat4.rotation(currT / 1.5, 0, 1, 0)).times(Mat4.translation(8, 0, 0));
-
-        if (Math.floor(currT % 2) == 1)
-            this.shapes.planet2.draw(context, program_state, planet2_res, this.materials.planet2_gouraud);
-        else
-            this.shapes.planet2.draw(context, program_state, planet2_res, this.materials.planet2_phong);
-
-
-
-        let planet3_res = model_transform;
-        planet3_res = planet3_res.times(Mat4.rotation(currT / 2, 0, 1, 0)).times(Mat4.translation(11, 0, 0))
-        this.shapes.planet3.draw(context, program_state, planet3_res, this.materials.planet3);
-
-        let ring_transform = planet3_res.times(Mat4.scale(3.5, 3.5, 0.1));
-        this.shapes.ring.draw(context, program_state, ring_transform, this.materials.ring);
-
-        let planet4_res = model_transform;
-        planet4_res = planet4_res.times(Mat4.rotation(currT / 3.5, 0, 1, 0)).times(Mat4.translation(14, 0, 0));
-        this.shapes.planet4.draw(context, program_state, planet4_res, this.materials.planet4);
-
-        let moon_res = planet4_res;
-        moon_res = moon_res.times(Mat4.rotation(currT, 0, 1, 0)).times(Mat4.translation(-2.5, 0, 0));
-        this.shapes.moon.draw(context, program_state, moon_res, this.materials.moon);
-        
-        this.moon = Mat4.inverse(moon_res.times(Mat4.translation(0, 0, 5)));
-        this.planet_1 = Mat4.inverse(planet1_res.times(Mat4.translation(0, 0, 5)));
-        this.planet_2 = Mat4.inverse(planet2_res.times(Mat4.translation(0, 0, 5)));
-        this.planet_3 = Mat4.inverse(planet3_res.times(Mat4.translation(0, 0, 5)));
-        this.planet_4 = Mat4.inverse(planet4_res.times(Mat4.translation(0, 0, 5)));
-
-        if (this.attached != undefined) {
-            let desired = this.attached();
-            let factor = .1;
-            program_state.camera_inverse = desired.map((mx, i) => Vector.from(program_state.camera_inverse[i]).mix(mx, factor));
-        }
-
-    }
+        this.shapes.car_cube.draw(context, program_state, model_transform, this.materials.car_cube); 
+       }
 }
 
 class Gouraud_Shader extends Shader { //edit here?
