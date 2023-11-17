@@ -11,67 +11,138 @@ Object.assign(tiny, widgets);
 const defs = {};
 
 export { tiny, defs };
-const CarCube = defs.CarCube =
-    class CarCube extends Shape {
+
+
+const Starship = defs.Starship =
+    class Van extends Shape {
+        // The Car class contains a cube for the body and four tori for the wheels
         constructor() {
             super("position", "normal", "texture_coord");
-            this.arrays.position = [
-                // Back face
-                vec3(-0.5, -0.5, -0.5), vec3(0.5, -0.5, -0.5), vec3(0.5, 0.5, -0.5), vec3(-0.5, 0.5, -0.5),
-                // Front face
-                vec3(-0.5, -0.5, 0.5), vec3(0.5, -0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(-0.5, 0.5, 0.5),
-                // Top face
-                vec3(-0.5, 0.5, -0.5), vec3(0.5, 0.5, -0.5), vec3(0.5, 0.5, 0.5), vec3(-0.5, 0.5, 0.5),
-                // Bottom face
-                vec3(-0.5, -0.5, -0.5), vec3(0.5, -0.5, -0.5), vec3(0.5, -0.5, 0.5), vec3(-0.5, -0.5, 0.5),
-                // Right face
-                vec3(0.5, -0.5, -0.5), vec3(0.5, 0.5, -0.5), vec3(0.5, 0.5, 0.5), vec3(0.5, -0.5, 0.5),
-                // Left face
-                vec3(-0.5, -0.5, -0.5), vec3(-0.5, 0.5, -0.5), vec3(-0.5, 0.5, 0.5), vec3(-0.5, -0.5, 0.5)
+
+            // Van body - a cube scaled to be 2 units taller than the car
+            Cube.insert_transformed_copy_into(this, [], Mat4.scale(1.5, 1.5, 1)); // if the car's y-scale was 2, the van's y-scale is now 4
+
+            // Pole dimensions
+            const pole_height = 5;   // The height of the pole
+            const pole_radius = 0.1; // The radius of the pole
+
+            // Pole - a capped cylinder rotated 90 degrees to lay flat
+            const pole_transform = Mat4.translation(0.6, 1.5, pole_height / 2)
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)) // Rotate 90 degrees around the x-axis
+                .times(Mat4.scale(pole_radius, pole_height / 2, pole_radius)); // Scale to make it a thin, tall cylinder
+            Capped_Cylinder.insert_transformed_copy_into(this, [4, 4], pole_transform);
+
+            const flag_width = 0.7;    // The width of the flag
+            const flag_height = 0.5; // The height of the flag
+
+            // Flag - a rectangle at the top of the pole
+            const flag_transform = Mat4.translation(0, 1.5, pole_height) // Translate to the top of the pole
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)) // Rotate 90 degrees around the x-axis
+                .times(Mat4.scale(flag_width, flag_height, 1)); // Scale the flag to its proper size
+            Square.insert_transformed_copy_into(this, [], flag_transform);
+
+
+
+            // Wheel placement calculations:
+            const wheel_radius = 0.4;
+            const vert_offset = 1.3; // Might need to be adjusted if the van's body is lower or higher off the ground
+            const wheel_width = 0.5;
+            const front_back_offset = 1; // Adjust if needed based on van length
+            const side_offset = 1.2; // Adjust if needed based on van width
+            const wheel_transforms = [
+                Mat4.translation(-front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(-front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width))
             ];
-            this.arrays.normal = [
-                // Back face
-                vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1),
-                // Front face
-                vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1),
-                // Top face
-                vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0),
-                // Bottom face
-                vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0),
-                // Right face
-                vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0),
-                // Left face
-                vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0)
+
+            // Add four tori for the wheels, transformed to their respective locations:
+            for (const transform of wheel_transforms) {
+                Torus.insert_transformed_copy_into(this, [15, 15], transform);
+            }
+        }
+
+    }
+
+
+
+
+const Van = defs.Van =
+    class Van extends Shape {
+        // The Car class contains a cube for the body and four tori for the wheels
+        constructor() {
+            super("position", "normal", "texture_coord");
+
+            // Van body - a cube scaled to be 2 units taller than the car
+            Cube.insert_transformed_copy_into(this, [], Mat4.scale(3, 2, 2)); // if the car's y-scale was 2, the van's y-scale is now 4
+
+
+            // Wheel placement calculations:
+            const wheel_radius = 0.8;
+            const vert_offset = 2.3; // Might need to be adjusted if the van's body is lower or higher off the ground
+            const wheel_width = 0.8;
+            const front_back_offset = 1.45; // Adjust if needed based on van length
+            const side_offset = 1.4; // Adjust if needed based on van width
+            const wheel_transforms = [
+                Mat4.translation(-front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(-front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width))
+            ];
+
+            // Add four tori for the wheels, transformed to their respective locations:
+            for (const transform of wheel_transforms) {
+                Torus.insert_transformed_copy_into(this, [15, 15], transform);
+            }
+        }
+
+    }
+
+
+
+
+
+const Car = defs.Car =
+    class Car extends Shape {
+        // The Car class contains a cube for the body and four tori for the wheels
+        constructor() {
+            // Call the constructor of the Shape superclass:
+            super("position", "normal", "texture_coord");
+
+            Cube.insert_transformed_copy_into(this, [], Mat4.scale(1.8, 2, 1));
+
+            // Hood - a smaller cube, flat and wide
+            const hood_transform = Mat4.translation(2.1, 0, -0.27) // Move it forward and up a bit
+                .times(Mat4.scale(.3, 2, 0.7)); // Scale it down to hood size
+            Cube.insert_transformed_copy_into(this, [], hood_transform);
+
+            // Wheel placement calculations:
+            const wheel_radius = 0.5;
+            const vert_offset = 1.2
+            const wheel_width = 0.5;
+            const front_back_offset = 1.45; // Almost the full length of the car body from the center
+            const side_offset = 1.2; // Half the width of the car body from the center
+            const wheel_transforms = [
+                Mat4.translation(-front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(-front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width))
             ];
 
 
-            this.arrays.texture_coord = [
-                // Back face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Front face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Top face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Bottom face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Right face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Left face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1)
-            ];
 
 
-            // Define the indices for the cube, 2 triangles per face
-            this.indices = [
-                0, 1, 2, 0, 2, 3,     // Back face
-                4, 5, 6, 4, 6, 7,     // Front face
-                8, 9, 10, 8, 10, 11,  // Top face
-                12, 13, 14, 12, 14, 15, // Bottom face
-                16, 17, 18, 16, 18, 19, // Right face
-                20, 21, 22, 20, 22, 23  // Left face
-            ];
+
+
+            // Add four tori for the wheels, transformed to their respective locations:
+            for (const transform of wheel_transforms) {
+                Torus.insert_transformed_copy_into(this, [15, 15], transform);
+            }
         }
     }
+
+
+
 
 
 

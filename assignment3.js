@@ -11,8 +11,8 @@ export class Assignment3 extends Scene {
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
-            car_cube: new defs.Cube(),
-
+            car_cube: new defs.Starship(),
+            
 
         };
 
