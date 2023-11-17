@@ -1,5 +1,5 @@
-import { tiny } from '../tiny-graphics.js';
-import { widgets } from '../tiny-graphics-widgets.js';
+import {tiny} from '../tiny-graphics.js';
+import {widgets} from '../tiny-graphics-widgets.js';
 // Pull these names into this module's scope for convenience:
 const {
     Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4,
@@ -10,7 +10,8 @@ Object.assign(tiny, widgets);
 
 const defs = {};
 
-export { tiny, defs };
+export {tiny, defs};
+
 const CarCube = defs.CarCube =
     class CarCube extends Shape {
         constructor() {
@@ -43,8 +44,7 @@ const CarCube = defs.CarCube =
                 // Left face
                 vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0)
             ];
-
-
+    
             this.arrays.texture_coord = [
                 // Back face
                 vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
@@ -59,8 +59,9 @@ const CarCube = defs.CarCube =
                 // Left face
                 vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1)
             ];
-
-
+    
+    
+    
             // Define the indices for the cube, 2 triangles per face
             this.indices = [
                 0, 1, 2, 0, 2, 3,     // Back face
@@ -70,7 +71,7 @@ const CarCube = defs.CarCube =
                 16, 17, 18, 16, 18, 19, // Right face
                 20, 21, 22, 20, 22, 23  // Left face
             ];
-        }
+        }    
     }
 
 
@@ -264,7 +265,7 @@ const Subdivision_Sphere = defs.Subdivision_Sphere =
                         if (tex[q[0]][0] < 0.5) {
                             this.indices[q[1]] = this.arrays.position.length;
                             this.arrays.position.push(this.arrays.position[q[0]].copy());
-                            this.arrays.normal.push(this.arrays.normal[q[0]].copy());
+                            this.arrays.normal.push(this.arrays.normal  [q[0]].copy());
                             tex.push(tex[q[0]].plus(vec(1, 0)));
                         }
                     }
@@ -298,7 +299,96 @@ const Subdivision_Sphere = defs.Subdivision_Sphere =
         }
     }
 
+const Bear_Body = defs.Bear_Body =
+    class Bear_Body extends Shape {
+        // **Bear_Body** Includes the head and torso of the bear character
+        constructor() {
+            super("position", "normal", "texture_coord");
+            let model_transform = Mat4.identity();
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], model_transform);
+            model_transform = model_transform.times(Mat4.translation(0, 0, 1));
+            model_transform = model_transform.times(Mat4.scale(0.6, 0.4, 0.3));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], model_transform);
+            let ear_model_transform = Mat4.identity();
+            ear_model_transform = ear_model_transform.times(Mat4.translation(0.7, 0.7, 0));
+            ear_model_transform = ear_model_transform.times(Mat4.scale(0.35, 0.35, 0.2));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], ear_model_transform);
 
+            let ear2_model_transform = Mat4.identity();
+            ear2_model_transform = ear2_model_transform.times(Mat4.translation(-0.7, 0.7, 0));
+            ear2_model_transform = ear2_model_transform.times(Mat4.scale(0.35, 0.35, 0.2));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], ear2_model_transform);
+
+
+            let bear_body_mt = Mat4.identity();
+            bear_body_mt = bear_body_mt.times(Mat4.translation(0, -1.6, 0));
+            bear_body_mt = bear_body_mt.times(Mat4.scale(1, 1.3, 1));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], bear_body_mt);
+
+            let tail = Mat4.identity();
+            tail = tail.times(Mat4.translation(0,-2.3,-0.85));
+            tail = tail.times(Mat4.scale(0.3, 0.3, 0.3));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], tail);
+        }
+    }
+
+const Bear_Face = defs.Bear_Face =
+    class Bear_Face extends Shape {
+        // **Bear_Body** Includes the head and torso of the bear character
+        constructor() {
+            super("position", "normal", "texture_coord");
+            let nose = Mat4.identity();
+            nose = nose.times(Mat4.translation(0,0.2,1.3));
+            nose = nose.times(Mat4.scale(0.15, 0.1, 0.075));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], nose);
+
+            let eye1 = Mat4.identity();
+            eye1 = eye1.times(Mat4.translation(0.37, 0.55, 0.75));
+            eye1 = eye1.times(Mat4.scale(0.1, 0.1, 0.075));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], eye1);
+
+            let eye2 = Mat4.identity();
+            eye2 = eye2.times(Mat4.translation(-0.37, 0.55, 0.75));
+            eye2 = eye2.times(Mat4.scale(0.1, 0.1, 0.075));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], eye2);
+        }
+    }
+
+const Bear_Limbs1 = defs.Bear_Limbs1 =
+    class Bear_Limbs1 extends Shape {
+        // **Bear_Body** Includes the head and torso of the bear character
+        constructor() {
+            super("position", "normal", "texture_coord");
+            let r_bear_arm = Mat4.identity();
+            r_bear_arm = r_bear_arm.times(Mat4.translation(1, -1.3, 0));
+            r_bear_arm = r_bear_arm.times(Mat4.rotation(3.75, 0,0,1));
+            r_bear_arm = r_bear_arm.times(Mat4.scale(0.4, 0.7, 0.4));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], r_bear_arm);
+
+            let l_bear_leg = Mat4.identity();
+            l_bear_leg = l_bear_leg.times(Mat4.translation(-0.75, -2.5, 0));
+            l_bear_leg = l_bear_leg.times(Mat4.scale(0.4,0.7,0.4));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], l_bear_leg);
+
+        }
+    }
+const Bear_Limbs2 = defs.Bear_Limbs2 =
+    class Bear_Limbs2 extends Shape {
+        // **Bear_Body** Includes the head and torso of the bear character
+        constructor() {
+            super("position", "normal", "texture_coord");
+            let l_bear_arm = Mat4.identity();
+            l_bear_arm = l_bear_arm.times(Mat4.translation(-1, -1.3, 0));
+            l_bear_arm = l_bear_arm.times(Mat4.rotation(-3.75, 0,0,1));
+            l_bear_arm = l_bear_arm.times(Mat4.scale(0.4, 0.7, 0.4));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], l_bear_arm);
+
+            let r_bear_leg = Mat4.identity();
+            r_bear_leg = r_bear_leg.times(Mat4.translation(0.75, -2.5, 0));
+            r_bear_leg = r_bear_leg.times(Mat4.scale(0.4,0.7,0.4));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], r_bear_leg);
+        }
+    }
 const Grid_Patch = defs.Grid_Patch =
     class Grid_Patch extends Shape {
         // A grid of rows and columns you can distort. A tesselation of triangles connects the
@@ -413,7 +503,7 @@ const Cone_Tip = defs.Cone_Tip =
 const Torus = defs.Torus =
     class Torus extends Shape {
         // Build a donut shape.  An example of a surface of revolution.
-        constructor(rows, columns, texture_range = [[0, 1], [0, 1]]) {
+        constructor(rows, columns, texture_range=[[0, 1], [0, 1]]) {
             super("position", "normal", "texture_coord");
             const circle_points = Array(rows).fill(vec3(1 / 3, 0, 0))
                 .map((p, i, a) => Mat4.translation(-2 / 3, 0, 0)
@@ -519,9 +609,9 @@ const Minimal_Webgl_Demo = defs.Minimal_Webgl_Demo =
         constructor(webgl_manager, control_panel) {
             super(webgl_manager, control_panel);
             // Don't create any DOM elements to control this scene:
-            this.widget_options = { make_controls: false, show_explanation: false };
+            this.widget_options = {make_controls: false, show_explanation: false};
             // Send a Triangle's vertices to the GPU's buffers:
-            this.shapes = { triangle: new Minimal_Shape() };
+            this.shapes = {triangle: new Minimal_Shape()};
             this.shader = new Basic_Shader();
         }
 
@@ -773,7 +863,7 @@ const Phong_Shader = defs.Phong_Shader =
             // within this function, one data field at a time, to fully initialize the shader for a draw.
 
             // Fill in any missing fields in the Material object with custom defaults for this shader:
-            const defaults = { color: color(0, 0, 0, 1), ambient: 0, diffusivity: 1, specularity: 1, smoothness: 40 };
+            const defaults = {color: color(0, 0, 0, 1), ambient: 0, diffusivity: 1, specularity: 1, smoothness: 40};
             material = Object.assign({}, defaults, material);
 
             this.send_material(context, gpu_addresses, material);
@@ -906,7 +996,7 @@ const Movement_Controls = defs.Movement_Controls =
         add_mouse_controls(canvas) {
             // add_mouse_controls():  Attach HTML mouse events to the drawing canvas.
             // First, measure mouse steering, for rotating the flyaround camera:
-            this.mouse = { "from_center": vec(0, 0) };
+            this.mouse = {"from_center": vec(0, 0)};
             const mouse_position = (e, rect = canvas.getBoundingClientRect()) =>
                 vec(e.clientX - (rect.left + rect.right) / 2, e.clientY - (rect.bottom + rect.top) / 2);
             // Set up mouse response.  The last one stops us from reacting if the mouse leaves the canvas:
