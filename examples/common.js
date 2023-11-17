@@ -10,7 +10,169 @@ Object.assign(tiny, widgets);
 
 const defs = {};
 
-export {tiny, defs};
+export { tiny, defs };
+
+
+const Starship = defs.Starship =
+    class Van extends Shape {
+        // The Car class contains a cube for the body and four tori for the wheels
+        constructor() {
+            super("position", "normal", "texture_coord");
+
+            // Van body - a cube scaled to be 2 units taller than the car
+            Cube.insert_transformed_copy_into(this, [], Mat4.scale(1.5, 1.5, 1)); // if the car's y-scale was 2, the van's y-scale is now 4
+
+            // Pole dimensions
+            const pole_height = 5;   // The height of the pole
+            const pole_radius = 0.1; // The radius of the pole
+
+            // Pole - a capped cylinder rotated 90 degrees to lay flat
+            const pole_transform = Mat4.translation(0.6, 1.5, pole_height / 2)
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)) // Rotate 90 degrees around the x-axis
+                .times(Mat4.scale(pole_radius, pole_height / 2, pole_radius)); // Scale to make it a thin, tall cylinder
+            Capped_Cylinder.insert_transformed_copy_into(this, [4, 4], pole_transform);
+
+            const flag_width = 0.7;    // The width of the flag
+            const flag_height = 0.5; // The height of the flag
+
+            // Flag - a rectangle at the top of the pole
+            const flag_transform = Mat4.translation(0, 1.5, pole_height) // Translate to the top of the pole
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)) // Rotate 90 degrees around the x-axis
+                .times(Mat4.scale(flag_width, flag_height, 1)); // Scale the flag to its proper size
+            Square.insert_transformed_copy_into(this, [], flag_transform);
+
+
+
+            // Wheel placement calculations:
+            const wheel_radius = 0.4;
+            const vert_offset = 1.3; // Might need to be adjusted if the van's body is lower or higher off the ground
+            const wheel_width = 0.5;
+            const front_back_offset = 1; // Adjust if needed based on van length
+            const side_offset = 1.2; // Adjust if needed based on van width
+            const wheel_transforms = [
+                Mat4.translation(-front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(-front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width))
+            ];
+    
+            this.arrays.texture_coord = [
+                // Back face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Front face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Top face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Bottom face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Right face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
+                // Left face
+                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1)
+            ];
+    
+    
+    
+            // Define the indices for the cube, 2 triangles per face
+            this.indices = [
+                0, 1, 2, 0, 2, 3,     // Back face
+                4, 5, 6, 4, 6, 7,     // Front face
+                8, 9, 10, 8, 10, 11,  // Top face
+                12, 13, 14, 12, 14, 15, // Bottom face
+                16, 17, 18, 16, 18, 19, // Right face
+                20, 21, 22, 20, 22, 23  // Left face
+            ];
+        }    
+
+            // Add four tori for the wheels, transformed to their respective locations:
+            for (const transform of wheel_transforms) {
+                Torus.insert_transformed_copy_into(this, [15, 15], transform);
+            }
+        }
+
+    }
+
+
+
+
+const Van = defs.Van =
+    class Van extends Shape {
+        // The Car class contains a cube for the body and four tori for the wheels
+        constructor() {
+            super("position", "normal", "texture_coord");
+
+            // Van body - a cube scaled to be 2 units taller than the car
+            Cube.insert_transformed_copy_into(this, [], Mat4.scale(3, 2, 2)); // if the car's y-scale was 2, the van's y-scale is now 4
+
+
+            // Wheel placement calculations:
+            const wheel_radius = 0.8;
+            const vert_offset = 2.3; // Might need to be adjusted if the van's body is lower or higher off the ground
+            const wheel_width = 0.8;
+            const front_back_offset = 1.45; // Adjust if needed based on van length
+            const side_offset = 1.4; // Adjust if needed based on van width
+            const wheel_transforms = [
+                Mat4.translation(-front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(-front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width))
+            ];
+
+            // Add four tori for the wheels, transformed to their respective locations:
+            for (const transform of wheel_transforms) {
+                Torus.insert_transformed_copy_into(this, [15, 15], transform);
+            }
+        }
+
+    }
+
+
+
+
+
+const Car = defs.Car =
+    class Car extends Shape {
+        // The Car class contains a cube for the body and four tori for the wheels
+        constructor() {
+            // Call the constructor of the Shape superclass:
+            super("position", "normal", "texture_coord");
+
+            Cube.insert_transformed_copy_into(this, [], Mat4.scale(1.8, 2, 1));
+
+            // Hood - a smaller cube, flat and wide
+            const hood_transform = Mat4.translation(2.1, 0, -0.27) // Move it forward and up a bit
+                .times(Mat4.scale(.3, 2, 0.7)); // Scale it down to hood size
+            Cube.insert_transformed_copy_into(this, [], hood_transform);
+
+            // Wheel placement calculations:
+            const wheel_radius = 0.5;
+            const vert_offset = 1.2
+            const wheel_width = 0.5;
+            const front_back_offset = 1.45; // Almost the full length of the car body from the center
+            const side_offset = 1.2; // Half the width of the car body from the center
+            const wheel_transforms = [
+                Mat4.translation(-front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(-front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
+                Mat4.translation(front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width))
+            ];
+
+
+
+
+
+
+            // Add four tori for the wheels, transformed to their respective locations:
+            for (const transform of wheel_transforms) {
+                Torus.insert_transformed_copy_into(this, [15, 15], transform);
+            }
+        }
+    }
+
+
+
+
+
 
 const CarCube = defs.CarCube =
     class CarCube extends Shape {
@@ -299,7 +461,96 @@ const Subdivision_Sphere = defs.Subdivision_Sphere =
         }
     }
 
+const Bear_Body = defs.Bear_Body =
+    class Bear_Body extends Shape {
+        // **Bear_Body** Includes the head and torso of the bear character
+        constructor() {
+            super("position", "normal", "texture_coord");
+            let model_transform = Mat4.identity();
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], model_transform);
+            model_transform = model_transform.times(Mat4.translation(0, 0, 1));
+            model_transform = model_transform.times(Mat4.scale(0.6, 0.4, 0.3));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], model_transform);
+            let ear_model_transform = Mat4.identity();
+            ear_model_transform = ear_model_transform.times(Mat4.translation(0.7, 0.7, 0));
+            ear_model_transform = ear_model_transform.times(Mat4.scale(0.35, 0.35, 0.2));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], ear_model_transform);
 
+            let ear2_model_transform = Mat4.identity();
+            ear2_model_transform = ear2_model_transform.times(Mat4.translation(-0.7, 0.7, 0));
+            ear2_model_transform = ear2_model_transform.times(Mat4.scale(0.35, 0.35, 0.2));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], ear2_model_transform);
+
+
+            let bear_body_mt = Mat4.identity();
+            bear_body_mt = bear_body_mt.times(Mat4.translation(0, -1.6, 0));
+            bear_body_mt = bear_body_mt.times(Mat4.scale(1, 1.3, 1));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], bear_body_mt);
+
+            let tail = Mat4.identity();
+            tail = tail.times(Mat4.translation(0,-2.3,-0.85));
+            tail = tail.times(Mat4.scale(0.3, 0.3, 0.3));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], tail);
+        }
+    }
+
+const Bear_Face = defs.Bear_Face =
+    class Bear_Face extends Shape {
+        // **Bear_Body** Includes the head and torso of the bear character
+        constructor() {
+            super("position", "normal", "texture_coord");
+            let nose = Mat4.identity();
+            nose = nose.times(Mat4.translation(0,0.2,1.3));
+            nose = nose.times(Mat4.scale(0.15, 0.1, 0.075));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], nose);
+
+            let eye1 = Mat4.identity();
+            eye1 = eye1.times(Mat4.translation(0.37, 0.55, 0.75));
+            eye1 = eye1.times(Mat4.scale(0.1, 0.1, 0.075));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], eye1);
+
+            let eye2 = Mat4.identity();
+            eye2 = eye2.times(Mat4.translation(-0.37, 0.55, 0.75));
+            eye2 = eye2.times(Mat4.scale(0.1, 0.1, 0.075));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], eye2);
+        }
+    }
+
+const Bear_Limbs1 = defs.Bear_Limbs1 =
+    class Bear_Limbs1 extends Shape {
+        // **Bear_Body** Includes the head and torso of the bear character
+        constructor() {
+            super("position", "normal", "texture_coord");
+            let r_bear_arm = Mat4.identity();
+            r_bear_arm = r_bear_arm.times(Mat4.translation(1, -1.3, 0));
+            r_bear_arm = r_bear_arm.times(Mat4.rotation(3.75, 0,0,1));
+            r_bear_arm = r_bear_arm.times(Mat4.scale(0.4, 0.7, 0.4));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], r_bear_arm);
+
+            let l_bear_leg = Mat4.identity();
+            l_bear_leg = l_bear_leg.times(Mat4.translation(-0.75, -2.5, 0));
+            l_bear_leg = l_bear_leg.times(Mat4.scale(0.4,0.7,0.4));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], l_bear_leg);
+
+        }
+    }
+const Bear_Limbs2 = defs.Bear_Limbs2 =
+    class Bear_Limbs2 extends Shape {
+        // **Bear_Body** Includes the head and torso of the bear character
+        constructor() {
+            super("position", "normal", "texture_coord");
+            let l_bear_arm = Mat4.identity();
+            l_bear_arm = l_bear_arm.times(Mat4.translation(-1, -1.3, 0));
+            l_bear_arm = l_bear_arm.times(Mat4.rotation(-3.75, 0,0,1));
+            l_bear_arm = l_bear_arm.times(Mat4.scale(0.4, 0.7, 0.4));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], l_bear_arm);
+
+            let r_bear_leg = Mat4.identity();
+            r_bear_leg = r_bear_leg.times(Mat4.translation(0.75, -2.5, 0));
+            r_bear_leg = r_bear_leg.times(Mat4.scale(0.4,0.7,0.4));
+            Subdivision_Sphere.insert_transformed_copy_into(this, [4], r_bear_leg);
+        }
+    }
 const Grid_Patch = defs.Grid_Patch =
     class Grid_Patch extends Shape {
         // A grid of rows and columns you can distort. A tesselation of triangles connects the
