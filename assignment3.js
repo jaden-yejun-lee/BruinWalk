@@ -1,17 +1,24 @@
 import { defs, tiny } from './examples/common.js';
+//import { CarCube, Car } from './classes/Car.js'; // Adjust the relative path as necessary
+import {RockCube, Rock} from './classes/Rock.js';
+import {FloorCube, Floor} from './classes/Floor.js';
+import {TreeCube, Tree, Cylindrical_Tube} from './classes/Tree.js';
 
-const {
-    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
-} = tiny;
+const { Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene } = tiny;
 
-export class Assignment3 extends Scene {
+
+export class MainProgram extends Scene {
     constructor() {
-        // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
+        console.log("this.tree.draw");
         super();
-
-        // At the beginning of our program, load one of each of these shape definitions onto the GPU.
+        // Shapes dictionary
         this.shapes = {
-            car_cube: new defs.Cube(),
+            //car_cube: new CarCube(),
+            rock_cube: new RockCube(),
+            sphereSubdivision4: new defs.Subdivision_Sphere(4),
+            floor: new FloorCube(),
+            tree_stump: new Cylindrical_Tube(),
+            tree_top: new TreeCube()
             bear_body: new defs.Bear_Body(),
             bear_face: new defs.Bear_Face(),
             bear_limbs1: new defs.Bear_Limbs1(),
@@ -20,40 +27,51 @@ export class Assignment3 extends Scene {
 
         };
 
-        // *** Materials
+        // Materials dictionary
         this.materials = {
+            //car: new Material(new defs.Phong_Shader(),
+                //{ ambient: 0.5, diffusivity: 1, color: hex_color("#FF0000") }),
+            rock: new Material(new defs.Phong_Shader(),
+                {ambient: 1, color: hex_color("5A5A5A")}),
+            sun: new Material(new defs.Phong_Shader(),
+                {ambient: 1, color: (1,1,1,1)}),
+            floor: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 1, specularity: 1, color: hex_color("90EE90")}),
+            tree_stump: new Material(new defs.Phong_Shader(),
+                {color: hex_color("8B4513")}),
+            tree_top: new Material(new defs.Phong_Shader(),
+                {color: hex_color("42692F")})
+        };
 
-            car_cube: new Material(new defs.Phong_Shader(),
-            { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
+        //this.car = new Car();
+        this.rock = new Rock();
+        this.floor = new Floor();
+        this.tree = new Tree();
+
             bear: new Material(new defs.Phong_Shader(),
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
 
         }
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+
     }
 
     make_control_panel() {
-        this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => (this.initial_camera_location));
-        this.new_line();
-        this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
-        this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
-        this.new_line();
-        this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
-        this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
-        this.new_line();
-        this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
+
     }
 
     display(context, program_state) {
-        if (!context.scratchpad.controls) {
-            this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
-            program_state.set_camera(this.initial_camera_location);
-        }
 
-        program_state.projection_transform = Mat4.perspective(
-            Math.PI / 4, context.width / context.height, .1, 1000);
 
+
+        //this.car.draw(context, program_state, this.shapes.car_cube, this.materials.car);
+        this.rock.draw(context, program_state, this.shapes.rock_cube, this.materials.rock);
+        this.floor.draw(context, program_state, this.shapes.floor, this.materials.floor);
+
+      
+      
+      
         let model_transform = Mat4.identity();
 
         const light_pos = vec4(0, 5, 5, 1);
@@ -194,64 +212,12 @@ class Gouraud_Shader extends Shader { //edit here?
         gl.uniform1fv(gpu.light_attenuation_factors, gpu_state.lights.map(l => l.attenuation));
     }
 
-    update_GPU(context, gpu_addresses, gpu_state, model_transform, material) {
-        // update_GPU(): Define how to synchronize our JavaScript's variables to the GPU's.  This is where the shader
-        // recieves ALL of its inputs.  Every value the GPU wants is divided into two categories:  Values that belong
-        // to individual objects being drawn (which we call "Material") and values belonging to the whole scene or
-        // program (which we call the "Program_State").  Send both a material and a program state to the shaders
-        // within this function, one data field at a time, to fully initialize the shader for a draw.
+        this.tree.draw(context, program_state, this.shapes, this.materials);
 
-        // Fill in any missing fields in the Material object with custom defaults for this shader:
-        const defaults = { color: color(0, 0, 0, 1), ambient: 0, diffusivity: 1, specularity: 1, smoothness: 40 };
-        material = Object.assign({}, defaults, material);
-
-        this.send_material(context, gpu_addresses, material);
-        this.send_gpu_state(context, gpu_addresses, gpu_state, model_transform);
     }
 }
 
-class Ring_Shader extends Shader {
-    update_GPU(context, gpu_addresses, graphics_state, model_transform, material) {
-        // update_GPU():  Defining how to synchronize our JavaScript's variables to the GPU's:
-        const [P, C, M] = [graphics_state.projection_transform, graphics_state.camera_inverse, model_transform],
-            PCM = P.times(C).times(M);
-        context.uniformMatrix4fv(gpu_addresses.model_transform, false, Matrix.flatten_2D_to_1D(model_transform.transposed()));
-        context.uniformMatrix4fv(gpu_addresses.projection_camera_model_transform, false,
-            Matrix.flatten_2D_to_1D(PCM.transposed()));
-    }
 
-    shared_glsl_code() {
-        // ********* SHARED CODE, INCLUDED IN BOTH SHADERS *********
-        return `
-        precision mediump float;
-        varying vec4 point_position;
-        varying vec4 center;
-        `;
-    }
 
-    vertex_glsl_code() {
-        // ********* VERTEX SHADER *********
-        return this.shared_glsl_code() + `
-        attribute vec3 position;
-        uniform mat4 model_transform;
-        uniform mat4 projection_camera_model_transform;
-        
-        void main(){
-          center = model_transform * vec4(0.0, 0.0, 0.0, 1.0);
-          point_position = model_transform * vec4(position, 1.0);
-          gl_Position = projection_camera_model_transform * vec4(position, 1.0);          
-        }`;
-    }
 
-    fragment_glsl_code() {
-        // ********* FRAGMENT SHADER *********
-        return this.shared_glsl_code() + `
-        void main(){
-            float frequency_multiplier = 30.0; 
-            float scalar = sin(frequency_multiplier * distance(point_position.xyz, center.xyz));
-            vec4 band_color = vec4(0.65, 0.42, 0.18, 1.0); // Adjusted color for a different shade
-            gl_FragColor = scalar * band_color;
-        }`;
-    }
-}
 
