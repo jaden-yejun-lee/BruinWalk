@@ -11,8 +11,12 @@ export class Assignment3 extends Scene {
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
-            car_cube: new defs.Starship(),
-            
+            car_cube: new defs.Cube(),
+            bear_body: new defs.Bear_Body(),
+            bear_face: new defs.Bear_Face(),
+            bear_limbs1: new defs.Bear_Limbs1(),
+            bear_limbs2: new defs.Bear_Limbs2(),
+
 
         };
 
@@ -21,6 +25,8 @@ export class Assignment3 extends Scene {
 
             car_cube: new Material(new defs.Phong_Shader(),
             { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
+            bear: new Material(new defs.Phong_Shader(),
+                { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
 
         }
 
@@ -53,8 +59,20 @@ export class Assignment3 extends Scene {
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
 
-        this.shapes.car_cube.draw(context, program_state, model_transform, this.materials.car_cube); 
-       }
+        //this.shapes.car_cube.draw(context, program_state, model_transform, this.materials.car_cube);
+        let testbearmt = Mat4.identity();
+        this.shapes.bear_body.draw(context, program_state, testbearmt, this.materials.bear);
+        this.shapes.bear_face.draw(context, program_state, testbearmt, this.materials.bear.override({color: hex_color("#000000")}));
+        const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
+
+        let theta = 0.2*Math.sin(4*Math.PI*t);
+        let testbearmt2 = testbearmt;
+        testbearmt = testbearmt.times(Mat4.rotation(theta,1, 0, 0));
+        this.shapes.bear_limbs1.draw(context, program_state, testbearmt, this.materials.bear);
+        testbearmt2 = testbearmt2.times(Mat4.rotation(-theta,1, 0, 0));
+        this.shapes.bear_limbs2.draw(context, program_state, testbearmt2, this.materials.bear);
+
+    }
 }
 
 class Gouraud_Shader extends Shader { //edit here?
