@@ -82,7 +82,7 @@ const Starship = defs.Starship =
                 16, 17, 18, 16, 18, 19, // Right face
                 20, 21, 22, 20, 22, 23  // Left face
             ];
-        }    
+         
 
             // Add four tori for the wheels, transformed to their respective locations:
             for (const transform of wheel_transforms) {
