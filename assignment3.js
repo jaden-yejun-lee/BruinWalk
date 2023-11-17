@@ -1,15 +1,14 @@
 import { defs, tiny } from './examples/common.js';
 //import { CarCube, Car } from './classes/Car.js'; // Adjust the relative path as necessary
-import {RockCube, Rock} from './classes/Rock.js';
-import {FloorCube, Floor} from './classes/Floor.js';
-import {TreeCube, Tree, Cylindrical_Tube} from './classes/Tree.js';
+import { RockCube, Rock } from './classes/Rock.js';
+import { FloorCube, Floor } from './classes/Floor.js';
+import { TreeCube, Tree, Cylindrical_Tube } from './classes/Tree.js';
 
 const { Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene } = tiny;
 
 
-export class MainProgram extends Scene {
+export class Assignment3 extends Scene {
     constructor() {
-        console.log("this.tree.draw");
         super();
         // Shapes dictionary
         this.shapes = {
@@ -18,7 +17,7 @@ export class MainProgram extends Scene {
             sphereSubdivision4: new defs.Subdivision_Sphere(4),
             floor: new FloorCube(),
             tree_stump: new Cylindrical_Tube(),
-            tree_top: new TreeCube()
+            tree_top: new TreeCube(),
             bear_body: new defs.Bear_Body(),
             bear_face: new defs.Bear_Face(),
             bear_limbs1: new defs.Bear_Limbs1(),
@@ -30,17 +29,17 @@ export class MainProgram extends Scene {
         // Materials dictionary
         this.materials = {
             //car: new Material(new defs.Phong_Shader(),
-                //{ ambient: 0.5, diffusivity: 1, color: hex_color("#FF0000") }),
+            //{ ambient: 0.5, diffusivity: 1, color: hex_color("#FF0000") }),
             rock: new Material(new defs.Phong_Shader(),
-                {ambient: 1, color: hex_color("5A5A5A")}),
+                { ambient: 1, color: hex_color("5A5A5A") }),
             sun: new Material(new defs.Phong_Shader(),
-                {ambient: 1, color: (1,1,1,1)}),
+                { ambient: 1, color: (1, 1, 1, 1) }),
             floor: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 1, specularity: 1, color: hex_color("90EE90")}),
+                { ambient: 1, diffusivity: 1, specularity: 1, color: hex_color("90EE90") }),
             tree_stump: new Material(new defs.Phong_Shader(),
-                {color: hex_color("8B4513")}),
+                { color: hex_color("8B4513") }),
             tree_top: new Material(new defs.Phong_Shader(),
-                {color: hex_color("42692F")})
+                { color: hex_color("42692F") })
         };
 
         //this.car = new Car();
@@ -48,12 +47,12 @@ export class MainProgram extends Scene {
         this.floor = new Floor();
         this.tree = new Tree();
 
-            bear: new Material(new defs.Phong_Shader(),
-                { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
+        bear: new Material(new defs.Phong_Shader(),
+            { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
 
-        }
 
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+
+            this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
 
     }
 
@@ -68,10 +67,11 @@ export class MainProgram extends Scene {
         //this.car.draw(context, program_state, this.shapes.car_cube, this.materials.car);
         this.rock.draw(context, program_state, this.shapes.rock_cube, this.materials.rock);
         this.floor.draw(context, program_state, this.shapes.floor, this.materials.floor);
+        this.tree.draw(context, program_state, this.shapes, this.materials);
 
-      
-      
-      
+
+
+
         let model_transform = Mat4.identity();
 
         const light_pos = vec4(0, 5, 5, 1);
@@ -80,14 +80,14 @@ export class MainProgram extends Scene {
         //this.shapes.car_cube.draw(context, program_state, model_transform, this.materials.car_cube);
         let testbearmt = Mat4.identity();
         this.shapes.bear_body.draw(context, program_state, testbearmt, this.materials.bear);
-        this.shapes.bear_face.draw(context, program_state, testbearmt, this.materials.bear.override({color: hex_color("#000000")}));
+        this.shapes.bear_face.draw(context, program_state, testbearmt, this.materials.bear.override({ color: hex_color("#000000") }));
         const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
 
-        let theta = 0.2*Math.sin(4*Math.PI*t);
+        let theta = 0.2 * Math.sin(4 * Math.PI * t);
         let testbearmt2 = testbearmt;
-        testbearmt = testbearmt.times(Mat4.rotation(theta,1, 0, 0));
+        testbearmt = testbearmt.times(Mat4.rotation(theta, 1, 0, 0));
         this.shapes.bear_limbs1.draw(context, program_state, testbearmt, this.materials.bear);
-        testbearmt2 = testbearmt2.times(Mat4.rotation(-theta,1, 0, 0));
+        testbearmt2 = testbearmt2.times(Mat4.rotation(-theta, 1, 0, 0));
         this.shapes.bear_limbs2.draw(context, program_state, testbearmt2, this.materials.bear);
 
     }
@@ -212,10 +212,9 @@ class Gouraud_Shader extends Shader { //edit here?
         gl.uniform1fv(gpu.light_attenuation_factors, gpu_state.lights.map(l => l.attenuation));
     }
 
-        this.tree.draw(context, program_state, this.shapes, this.materials);
 
-    }
 }
+
 
 
 
