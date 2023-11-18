@@ -10,6 +10,34 @@ const grey = color(0.5, 0.5, 0.5, 1);
 export class Assignment3 extends Scene {
     constructor() {
         super();
+
+        this.shapes = {
+            car: new defs.Car(),
+            //starship: new defs.Starship(),
+            rock: new defs.Rock(),
+            tree: new defs.Tree(),
+            floor: new defs.Floor(),
+        };
+
+        // *** Materials
+        this.materials = {
+            car: new Material(new defs.Phong_Shader(),
+                { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
+            starship: new Material(new defs.Phong_Shader(),
+                { ambient: 0.5, diffusivity: 0.5, color: hex_color("#F0F0F0") }),
+            rock: new Material(new defs.Phong_Shader(),
+                {ambient: 1, color: hex_color("5A5A5A")}),
+            tree_stump: new Material(new defs.Phong_Shader(),
+                {color: hex_color("8B4513")}),
+            tree_top: new Material(new defs.Phong_Shader(),
+                {color: hex_color("42692F")}),
+            floor: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 1, specularity: 1, color: hex_color("90EE90")}),
+        }
+
+
+
+
         const starship_shapes = {
             body: new defs.Cube(),
             pole: new defs.Capped_Cylinder(4, 4),
@@ -78,25 +106,12 @@ export class Assignment3 extends Scene {
         //this.vehicle_manager.add_vehicle(starship2);
         //this.vehicle_manager.add_vehicle(van);
         this.vehicle_manager.add_vehicle(car);
-        this.shapes = {
-            car: new defs.Car(),
-            //starship: new defs.Starship(),
 
-        };
 
         // Add vehicles to the manager
 
-        // *** Materials
-        this.materials = {
-
-            car: new Material(new defs.Phong_Shader(),
-                { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
-            starship: new Material(new defs.Phong_Shader(),
-                { ambient: 0.5, diffusivity: 0.5, color: hex_color("#F0F0F0") }),
-
-        }
-
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+        // adjusted camera back to get more complete view of field
+        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 40), vec3(0, 0, 0), vec3(0, 1, 0));
     }
 
     make_control_panel() {
@@ -125,7 +140,39 @@ export class Assignment3 extends Scene {
 
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
-        this.vehicle_manager.update_and_draw(context, program_state);
+        //this.vehicle_manager.update_and_draw(context, program_state);
+
+        // draws floor
+        this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
+
+        // draws rocks
+        let rock_transform = Mat4.identity();
+        this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
+        //rock_transform = rock_transform.times(Mat4.translation(-8,0,0));
+        //this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
+
+        // draws trees
+        let tree_transform = Mat4.identity()
+            .times(Mat4.translation(10, 0, 0));
+        this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
+        //tree_transform = Mat4.identity().times(Mat4.translation(4,0,0));
+        //this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
+
+        let i = 0;
+
+        // Creates a row of rocks on top side of floor
+        for (i = -20; i <= 20; i += 2) {
+            rock_transform = Mat4.identity();
+            rock_transform = rock_transform.times(Mat4.translation(i, 0, -20));
+            this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock)
+        }
+
+        // Creates a row of trees on right side of floor
+        for (i = -18; i <= 20; i += 2) {
+            tree_transform = Mat4.identity();
+            tree_transform = tree_transform.times(Mat4.translation(20, 0, i));
+            this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top)
+        }
 
         // for (let path of this.starship_paths) {
         //     // Calculate the current position along the path
