@@ -181,7 +181,6 @@ export class Assignment3 extends Scene {
        /* let camera_location = Mat4.look_at(vec3(this.x_movement, 15, 38), vec3(this.x_movement, 0, 0), vec3(0, 1, 0));
         program_state.set_camera(camera_location);*/
 
-        const t = program_state.animation_time / 1000; // Current time in seconds
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
@@ -195,23 +194,7 @@ export class Assignment3 extends Scene {
         // draws floor
         this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
 
-        // draws rocks
-        let rock_transform = Mat4.identity();
-        this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
 
-        // draws trees
-        let tree_transform = Mat4.identity()
-            .times(Mat4.translation(10, 0, 0));
-        this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
-
-        let i = 0;
-
-        // Creates a row of rocks on top side of floor
-        for (i = -20; i <= 20; i += 2) {
-            rock_transform = Mat4.identity();
-            rock_transform = rock_transform.times(Mat4.translation(i, 0, -20));
-            this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock)
-        }
 
         //Drawing bear:
         let bear_mt = Mat4.identity();
