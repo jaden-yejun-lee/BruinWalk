@@ -41,9 +41,9 @@ export class Assignment3 extends Scene {
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
         }
 
-        this.direction = 0;
-        this.x_movement = 0;
-        this.z_movement = 0;
+        this.direction = 1;
+        this.x_movement = 0; //x movement is bound by 0 to 2*x-width of screen
+        this.z_movement = 0; //z movement is bound by -z-width to +z-width of screen
 
 
         const starship_shapes = {
@@ -123,49 +123,36 @@ export class Assignment3 extends Scene {
     }
 
     draw_bear(context, program_state, mt, t) {
-        let angle = this.direction*Math.PI/2; //default front
-        if (this.x_movement > 40) //x movement is bound by 0 to 2*x-width of screen
-            this.x_movement = 40;
-        if (this.x_movement < 0)
-            this.x_movement = 0;
-        if (this.z_movement > 20)//z movement is bound by -z-width to +z-width of screen
-            this.z_movement = 20;
-        if (this.z_movement < -20)
-            this.z_movement = -20;
-        let d_x = this.x_movement;
-        let d_z = this.z_movement;
-        mt = mt.times(Mat4.translation(d_x, 0, d_z));
-        mt = mt.times(Mat4.rotation(angle, 0, 1, 0));
-        let mt2 = mt;
-        let mt1 = mt;
+        let angle = this.direction*Math.PI/2; //default front, used to face the bear the correct way
+        let theta = 0.2*Math.sin(4*Math.PI*t); //Arm/leg swing angle
+        mt = mt.times(Mat4.translation(this.x_movement, 0, this.z_movement));
+        mt = mt.times(Mat4.rotation(angle, 0, 1, 0)); //Rotate bear to face direction he is walking
 
-        let theta = 0.2*Math.sin(4*Math.PI*t);
-        mt1 = mt1.times(Mat4.rotation(theta,1, 0, 0));
-        mt2 = mt2.times(Mat4.rotation(-theta,1, 0, 0));
         this.shapes.bear_body.draw(context, program_state, mt, this.materials.bear);
         this.shapes.bear_face.draw(context, program_state, mt, this.materials.bear.override({color: hex_color("#000000")}));
-        this.shapes.bear_limbs1.draw(context, program_state, mt1, this.materials.bear);
-        this.shapes.bear_limbs2.draw(context, program_state, mt2, this.materials.bear);
-
+        mt = mt.times(Mat4.rotation(theta,1, 0, 0));
+        this.shapes.bear_limbs1.draw(context, program_state, mt, this.materials.bear);
+        mt = mt.times(Mat4.rotation(-2*theta,1, 0, 0));
+        this.shapes.bear_limbs2.draw(context, program_state, mt, this.materials.bear);
     }
     make_control_panel() {
         this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => (this.initial_camera_location));
         this.new_line();
         this.key_triggered_button("Up", ['ArrowUp'], () => {
-            this.z_movement = this.z_movement - 1;
+            if (this.z_movement >-20) {this.z_movement = this.z_movement - 1;}
             this.direction = 2;
             this.run = 1;
         });
         this.key_triggered_button("Down", ['ArrowDown'], () => {
-            this.z_movement = this.z_movement + 1;
+            if (this.z_movement < 20) {this.z_movement = this.z_movement + 1;}
             this.direction = 0;
             this.run = 1;});
         this.key_triggered_button("Left", ['ArrowLeft'], () => {
-            this.x_movement = this.x_movement - 1;
+            if (this.x_movement > 0) {this.x_movement = this.x_movement - 1;}
             this.direction = 3;
             this.run = 1;});
         this.key_triggered_button("Right", ['ArrowRight'], () => {
-            this.x_movement = this.x_movement + 1;
+            if (this.x_movement < 40) {this.x_movement = this.x_movement + 1;}
             this.direction = 1;
             this.run = 1;});
     }
