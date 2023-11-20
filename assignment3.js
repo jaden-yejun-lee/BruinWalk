@@ -111,8 +111,8 @@ export class Assignment3 extends Scene {
             // Define other materials if needed
         };
 
-        const car_path = { start: vec3(10, 0, 2), end: vec3(-10, 0, 2), speed: 0.5 };
-        const car_direction = vec3(1, 0, 0);
+        const car_path = { start: vec3(0, 0, 10), end: vec3(0, 0, -10), speed: 0.5 };
+        const car_direction = vec3(0, -1, 0);
 
 
         this.vehicle_manager = new VehicleManager();
@@ -122,9 +122,9 @@ export class Assignment3 extends Scene {
         const van = new defs.Van(van_materials, van_path, van_shapes, van_direction);
         const car = new defs.Car(car_materials, car_path, car_shapes, car_direction);
 
-        //this.vehicle_manager.add_vehicle(starship1);
-        //this.vehicle_manager.add_vehicle(starship2);
-        this.vehicle_manager.add_vehicle(car);
+        this.vehicle_manager.add_vehicle(starship1);
+        this.vehicle_manager.add_vehicle(starship2);
+        //this.vehicle_manager.add_vehicle(car);
         
 
 

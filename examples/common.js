@@ -13,7 +13,7 @@ const defs = {};
 export { tiny, defs };
 
 class Vehicle extends Shape {
-    constructor(transform, materials, direction = vec3(1, 0, 0)) {
+    constructor(transform, materials, direction = vec3(0, 1, 0)) {
         super("position", "normal", "texture_coord");
         this.transform = transform; // Store the local transform for the vehicle
         this.materials = materials; // Store the materials for the vehicle
@@ -256,7 +256,9 @@ const Car = defs.Car =
             // Start with the current transform and apply additional transformations
             let model_transform = this.transform;
             model_transform = model_transform
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+                .times(Mat4.rotation(Math.PI / 2, -1, 0, 0))
+                .times(Mat4.rotation(Math.PI / 2, 0, 0, 1))
+                .times(Mat4.translation(0, 0, 0.7))
             // Draw the body of the car
             let body_transform = model_transform
                 .times(Mat4.scale(1.8, 2, 0.7))
