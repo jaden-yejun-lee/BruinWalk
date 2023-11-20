@@ -482,6 +482,50 @@ const Cube = defs.Cube =
         }
     }
 
+const Rock = defs.Rock =
+    class Rock extends Cube {
+        constructor() {
+            super();
+            this.body = new Cube;
+            this.topCube = new Cube;
+        }
+        draw (context, program_state, model_transform, material) {
+            let rock_transform = model_transform;
+            this.body.draw(context, program_state, rock_transform, material);
+            let rockTop_transform = rock_transform
+                .times(Mat4.scale(0.5,0.5,0.5))
+                .times(Mat4.translation(0,2,0));
+            this.topCube.draw(context, program_state, rockTop_transform, material);
+
+        }
+    }
+
+
+// (**) To scale floor, divide dimension(length x width) by 2 and add 1 and put these values in the floor_transforms scale transformation (only for even dimensions)
+// When positioning objects in Assignment3.js, translate using Right Hand Rule, where length becomes x, width becomes z to account for rotation
+// Ex) If you want 40 x 40 grid, do scale (21, 21, 0.1) down below
+// With origin being Mat4.identity(), this extends 20 units right from origin, 20 units left from origin (same for top/bottom)
+// To position object, move to Assignment 3 and translate. In this case:
+//      top right corner would be translation(20, 0, -20) where length is x and width is z
+//      middle right edge would be translation (20, 0, 0)
+//      bottom right corner would be translation (20, 0, 20)
+const Floor = defs.Floor =
+    class Floor extends Cube {
+        constructor() {
+            super();
+            this.body = new Cube;
+        }
+        draw (context, program_state, model_transform, material) {
+            let floor_transform = Mat4.identity()
+                .times(Mat4.translation(0,-1.1,0))      // minor edit so objects can be directly placed on top of floor
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates floor to be flat
+                .times(Mat4.scale(21, 21, 0.1))     // (**) flattened and scaled
+            this.body.draw(context, program_state, floor_transform, material);
+        }
+
+    }
+
+
 
 const Subdivision_Sphere = defs.Subdivision_Sphere =
     class Subdivision_Sphere extends Shape {
@@ -754,6 +798,37 @@ const Cylindrical_Tube = defs.Cylindrical_Tube =
             super(rows, columns, Vector3.cast([1, 0, .5], [1, 0, -.5]), texture_range);
         }
     }
+
+const Tree = defs.Tree =
+    class Tree extends Shape {
+        constructor() {
+            super();
+            this.stump = new Cylindrical_Tube(20,20);
+            this.top = new Cube;
+        }
+        draw (context, program_state, model_transform, stump_material, tree_top_material) {
+            // stump transformations
+            let stump_transform = model_transform
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotate cylinder to be vertical
+                .times(Mat4.scale(1, 1, 2))     // scale cylinder to be longer
+            // draws stump
+            this.stump.draw(context, program_state, stump_transform, stump_material);
+            stump_transform = stump_transform
+                .times(Mat4.scale(1, 1, 0.5))   // revert stump rotations
+                .times(Mat4.rotation(Math.PI/2, -1, 0, 0))
+
+            let treeTop_transform = stump_transform
+                .times(Mat4.translation(0, 2, 0));  // first box starts at top of cylinder
+            // draws first box for top part of tree
+            this.top.draw(context, program_state, treeTop_transform, tree_top_material)
+            treeTop_transform = treeTop_transform
+                .times(Mat4.translation(0, 2, 0))   // add another box on top of first box
+            // draws second box for top part of tree
+            this.top.draw(context, program_state, treeTop_transform, tree_top_material)
+
+        }
+    }
+
 
 const Cone_Tip = defs.Cone_Tip =
     class Cone_Tip extends Surface_Of_Revolution {
