@@ -17,6 +17,7 @@ export class Assignment3 extends Scene {
             bear_limbs1: new defs.Bear_Limbs1(),
             bear_limbs2: new defs.Bear_Limbs2(),
 
+
         };
 
         // *** Materials
