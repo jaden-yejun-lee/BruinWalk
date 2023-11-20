@@ -21,6 +21,7 @@ export class Assignment3 extends Scene {
             bear_face: new defs.Bear_Face(),
             bear_limbs1: new defs.Bear_Limbs1(),
             bear_limbs2: new defs.Bear_Limbs2(),
+
         };
 
         // *** Materials
@@ -45,6 +46,7 @@ export class Assignment3 extends Scene {
         this.x_movement = 0; //x movement is bound by 0 to 2*x-width of screen
         this.z_movement = 0; //z movement is bound by -z-width to +z-width of screen
         this.camera_dx = 0;
+
 
         const starship_shapes = {
             body: new defs.Cube(),
@@ -120,6 +122,7 @@ export class Assignment3 extends Scene {
 
         // adjusted camera back to get more complete view of field
         this.initial_camera_location = Mat4.look_at(vec3(0, 15, 38), vec3(0, 0, 0), vec3(0, 1, 0));
+
     }
 
     draw_bear(context, program_state, mt, t) {
@@ -162,6 +165,7 @@ export class Assignment3 extends Scene {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             program_state.set_camera(this.initial_camera_location);
         }
+        const t = program_state.animation_time / 1000; // Current time in seconds
 
         //Update where camera is looking:
        /* let camera_location = Mat4.look_at(vec3(this.x_movement, 15, 38), vec3(this.x_movement, 0, 0), vec3(0, 1, 0));
@@ -176,6 +180,32 @@ export class Assignment3 extends Scene {
 
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
+        //this.vehicle_manager.update_and_draw(context, program_state);
+
+        // draws floor
+        this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
+
+        // draws rocks
+        let rock_transform = Mat4.identity();
+        this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
+        //rock_transform = rock_transform.times(Mat4.translation(-8,0,0));
+        //this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
+
+        // draws trees
+        let tree_transform = Mat4.identity()
+            .times(Mat4.translation(10, 0, 0));
+        this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
+        //tree_transform = Mat4.identity().times(Mat4.translation(4,0,0));
+        //this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
+
+        let i = 0;
+
+        // Creates a row of rocks on top side of floor
+        for (i = -20; i <= 20; i += 2) {
+            rock_transform = Mat4.identity();
+            rock_transform = rock_transform.times(Mat4.translation(i, 0, -20));
+            this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock)
+        }
 
         //Drawing bear:
         let bear_mt = Mat4.identity();
@@ -214,6 +244,7 @@ export class Assignment3 extends Scene {
             tree_transform = tree_transform.times(Mat4.translation(20, 0, i));
             this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top)
         }
+
 
         // for (let path of this.starship_paths) {
         //     // Calculate the current position along the path
