@@ -1,42 +1,137 @@
 import { defs, tiny } from './examples/common.js';
-
+import { VehicleManager } from './examples/common.js';
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
 } = tiny;
+const red = color(1, 0, 0, 1); // Red color, fully opaque
+const white = color(1, 1, 1, 1); // White color, fully opaque
+const grey = color(0.5, 0.5, 0.5, 1);
 
 export class Assignment3 extends Scene {
     constructor() {
-        // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
 
-        // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
-            car_cube: new defs.Cube(),
+            car: new defs.Car(),
+            //starship: new defs.Starship(),
+            rock: new defs.Rock(),
+            tree: new defs.Tree(),
+            floor: new defs.Floor(),
             bear_body: new defs.Bear_Body(),
             bear_face: new defs.Bear_Face(),
             bear_limbs1: new defs.Bear_Limbs1(),
             bear_limbs2: new defs.Bear_Limbs2(),
-
-
         };
 
         // *** Materials
         this.materials = {
-
-            car_cube: new Material(new defs.Phong_Shader(),
-            { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
+            car: new Material(new defs.Phong_Shader(),
+                { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
+            starship: new Material(new defs.Phong_Shader(),
+                { ambient: 0.5, diffusivity: 0.5, color: hex_color("#F0F0F0") }),
+            rock: new Material(new defs.Phong_Shader(),
+                {ambient: 1, color: hex_color("5A5A5A")}),
+            tree_stump: new Material(new defs.Phong_Shader(),
+                {color: hex_color("8B4513")}),
+            tree_top: new Material(new defs.Phong_Shader(),
+                {color: hex_color("42692F")}),
+            floor: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("90EE90")}),
             bear: new Material(new defs.Phong_Shader(),
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
-
         }
+
         this.direction = 0;
         this.x_movement = 0;
         this.z_movement = 0;
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+
+
+        const starship_shapes = {
+            body: new defs.Cube(),
+            pole: new defs.Capped_Cylinder(4, 4),
+            flag: new defs.Square(),
+            wheel: new defs.Torus(15, 15)
+        };
+        const starship_materials = {
+            starship: new Material(new defs.Phong_Shader(), { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
+            body: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: grey }),
+            pole: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: white }),
+            flag: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: red }),
+            wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+        };
+
+        const starship_path1 = { start: vec3(-10, 0, 2), end: vec3(10, 0, 2), speed: 0.5 };
+        const starship_path2 = { start: vec3(10, 0, 4), end: vec3(-10, 0, 4), speed: 0.5 };
+
+
+        const van_shapes = {
+            body: new defs.Cube(),
+            wheel: new defs.Torus(15, 15),
+        };
+
+        const van_materials = {
+            body: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: red }),
+            wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+        };
+
+        const van_path = { start: vec3(10, 0, 2), end: vec3(-10, 0, 2), speed: 0.5 };
+        const van_direction = vec3(-1, 0, 0); // For van going right to left
+
+        const car_shapes = {
+            body: new defs.Cube(),
+            hood: new defs.Cube(),
+            wheel: new defs.Torus(15, 15)
+        };
+
+        const car_materials = {
+            body: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: red }),
+            hood: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#F0F000") }),
+                wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            // Define other materials if needed
+        };
+
+        const car_path = { start: vec3(10, 0, 2), end: vec3(-10, 0, 2), speed: 0.5 };
+        const car_direction = vec3(1, 0, 0);
+
+
+        this.vehicle_manager = new VehicleManager();
+
+        const starship1 = new defs.Starship(starship_materials, starship_path1, starship_shapes);
+        const starship2 = new defs.Starship(starship_materials, starship_path2, starship_shapes, vec3(-1, 0, 0));
+        const van = new defs.Van(van_materials, van_path, van_shapes, van_direction);
+        const car = new defs.Car(car_materials, car_path, car_shapes, car_direction);
+
+        //this.vehicle_manager.add_vehicle(starship1);
+        //this.vehicle_manager.add_vehicle(starship2);
+        //this.vehicle_manager.add_vehicle(van);
+        this.vehicle_manager.add_vehicle(car);
+
+
+        // Add vehicles to the manager
+
+        // adjusted camera back to get more complete view of field
+        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 40), vec3(0, 0, 0), vec3(0, 1, 0));
     }
 
     draw_bear(context, program_state, mt, t) {
         let angle = this.direction*Math.PI/2; //default front
+        if (this.x_movement > 40) //x movement is bound by 0 to 2*x-width of screen
+            this.x_movement = 40;
+        if (this.x_movement < 0)
+            this.x_movement = 0;
+        if (this.z_movement > 20)//z movement is bound by -z-width to +z-width of screen
+            this.z_movement = 20;
+        if (this.z_movement < -20)
+            this.z_movement = -20;
         let d_x = this.x_movement;
         let d_z = this.z_movement;
         mt = mt.times(Mat4.translation(d_x, 0, d_z));
@@ -80,6 +175,7 @@ export class Assignment3 extends Scene {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             program_state.set_camera(this.initial_camera_location);
         }
+        const t = program_state.animation_time / 1000; // Current time in seconds
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
@@ -88,10 +184,58 @@ export class Assignment3 extends Scene {
 
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
+
         //Drawing bear:
-        const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
-        const bear_mt = Mat4.identity();
+        let bear_mt = Mat4.identity();
+        bear_mt = bear_mt.times(Mat4.translation(-20,2,0));
         this.draw_bear(context, program_state, bear_mt, t);
+        //this.vehicle_manager.update_and_draw(context, program_state);
+
+        // draws floor
+        this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
+
+        // draws rocks
+        let rock_transform = Mat4.identity();
+        this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
+        //rock_transform = rock_transform.times(Mat4.translation(-8,0,0));
+        //this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
+
+        // draws trees
+        let tree_transform = Mat4.identity()
+            .times(Mat4.translation(10, 0, 0));
+        this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
+        //tree_transform = Mat4.identity().times(Mat4.translation(4,0,0));
+        //this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
+
+        let i = 0;
+
+        // Creates a row of rocks on top side of floor
+        for (i = -20; i <= 20; i += 2) {
+            rock_transform = Mat4.identity();
+            rock_transform = rock_transform.times(Mat4.translation(i, 0, -20));
+            this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock)
+        }
+
+        // Creates a row of trees on right side of floor
+        for (i = -18; i <= 20; i += 2) {
+            tree_transform = Mat4.identity();
+            tree_transform = tree_transform.times(Mat4.translation(20, 0, i));
+            this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top)
+        }
+
+        // for (let path of this.starship_paths) {
+        //     // Calculate the current position along the path
+        //     const position_along_path = (t * path.speed) % 1; // This will be a value between 0 and 1
+        //     // Interpolate between the start and end points based on position_along_path
+        //     let model_transform = Mat4.identity()
+        //         .times(Mat4.translation(...path.start.mix(path.end, position_along_path)))
+        //         .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)) 
+        //         .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)) 
+        //         .times(Mat4.rotation(Math.PI / 2, -1, 0, 0));
+
+        //     // Draw the starship at the current position
+        //     this.shapes.starship.draw(context, program_state, model_transform, this.materials.starship);
+        // }
     }
 }
 
@@ -274,4 +418,3 @@ class Ring_Shader extends Shader {
         }`;
     }
 }
-
