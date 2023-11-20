@@ -1,4 +1,4 @@
- import { defs, tiny } from '../examples/common.js';
+ /* import { defs, tiny } from '../examples/common.js';
 const { vec, vec3, vec4, color, Mat4, Material, Shape, Vector3, Vector } = tiny;
 
  const Square = defs.Square =
@@ -47,7 +47,6 @@ export class Rock {
     }
     // draws rock with little stubble on top
     draw(context, program_state, shapes, material) {
-        console.log("drawing rock");
         let rock_transform = Mat4.identity();
         //rock_transform = rock_transform.times(Mat4.translation(3,0 ,0));
         this.body.draw(context, program_state, rock_transform, material);
@@ -57,4 +56,4 @@ export class Rock {
         this.topCube.draw(context, program_state, rockTop_transform, material)
 
     }
-}
+} */

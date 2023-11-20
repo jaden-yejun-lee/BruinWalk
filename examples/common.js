@@ -1,5 +1,5 @@
-import {tiny} from '../tiny-graphics.js';
-import {widgets} from '../tiny-graphics-widgets.js';
+import { tiny } from '../tiny-graphics.js';
+import { widgets } from '../tiny-graphics-widgets.js';
 // Pull these names into this module's scope for convenience:
 const {
     Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4,
@@ -12,98 +12,169 @@ const defs = {};
 
 export { tiny, defs };
 
+class Vehicle extends Shape {
+    constructor(transform, materials, direction = vec3(1, 0, 0)) {
+        super("position", "normal", "texture_coord");
+        this.transform = transform; // Store the local transform for the vehicle
+        this.materials = materials; // Store the materials for the vehicle
+        this.direction = direction;
+    }
+
+    // Update the vehicle's position
+    update(t) {
+        // Placeholder for movement logic to be overridden by subclasses
+        throw "Subclasses of Vehicle must override update(t)";
+    }
+
+    // Draw the vehicle
+    draw(context, program_state) {
+        // Placeholder for drawing code to be overridden by subclasses
+        throw "Subclasses of Vehicle must override draw(context, program_state)";
+    }
+}
+
+export class VehicleManager {
+    constructor() {
+        this.vehicles = []; // An array to hold all the vehicles
+    }
+
+    // Method to add vehicles to the manager
+    add_vehicle(vehicle) {
+        this.vehicles.push(vehicle);
+    }
+
+    // Update the position of all vehicles and draw them
+    update_and_draw(context, program_state) {
+        for (let vehicle of this.vehicles) {
+            vehicle.update(program_state.animation_time / 1000);
+            vehicle.draw(context, program_state);
+        }
+    }
+}
 
 const Starship = defs.Starship =
-    class Van extends Shape {
-        // The Car class contains a cube for the body and four tori for the wheels
-        constructor() {
-            super("position", "normal", "texture_coord");
-
-            // Van body - a cube scaled to be 2 units taller than the car
-            Cube.insert_transformed_copy_into(this, [], Mat4.scale(1.5, 1.5, 1)); // if the car's y-scale was 2, the van's y-scale is now 4
-
-            // Pole dimensions
-            const pole_height = 5;   // The height of the pole
-            const pole_radius = 0.1; // The radius of the pole
-
-            // Pole - a capped cylinder rotated 90 degrees to lay flat
-            const pole_transform = Mat4.translation(0.6, 1.5, pole_height / 2)
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)) // Rotate 90 degrees around the x-axis
-                .times(Mat4.scale(pole_radius, pole_height / 2, pole_radius)); // Scale to make it a thin, tall cylinder
-            Capped_Cylinder.insert_transformed_copy_into(this, [4, 4], pole_transform);
-
-            const flag_width = 0.7;    // The width of the flag
-            const flag_height = 0.5; // The height of the flag
-
-            // Flag - a rectangle at the top of the pole
-            const flag_transform = Mat4.translation(0, 1.5, pole_height) // Translate to the top of the pole
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)) // Rotate 90 degrees around the x-axis
-                .times(Mat4.scale(flag_width, flag_height, 1)); // Scale the flag to its proper size
-            Square.insert_transformed_copy_into(this, [], flag_transform);
-
-
-
-            // Wheel placement calculations:
-            const wheel_radius = 0.4;
-            const vert_offset = 1.3; // Might need to be adjusted if the van's body is lower or higher off the ground
-            const wheel_width = 0.5;
-            const front_back_offset = 1; // Adjust if needed based on van length
-            const side_offset = 1.2; // Adjust if needed based on van width
-            const wheel_transforms = [
-                Mat4.translation(-front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
-                Mat4.translation(front_back_offset, -side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
-                Mat4.translation(-front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
-                Mat4.translation(front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width))
-            ];
-    
-            this.arrays.texture_coord = [
-                // Back face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Front face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Top face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Bottom face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Right face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Left face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1)
-            ];
-    
-    
-    
-            // Define the indices for the cube, 2 triangles per face
-            this.indices = [
-                0, 1, 2, 0, 2, 3,     // Back face
-                4, 5, 6, 4, 6, 7,     // Front face
-                8, 9, 10, 8, 10, 11,  // Top face
-                12, 13, 14, 12, 14, 15, // Bottom face
-                16, 17, 18, 16, 18, 19, // Right face
-                20, 21, 22, 20, 22, 23  // Left face
-            ];
-         
-
-            // Add four tori for the wheels, transformed to their respective locations:
-            for (const transform of wheel_transforms) {
-                Torus.insert_transformed_copy_into(this, [15, 15], transform);
-            }
+    class Starship extends Vehicle {
+        constructor(materials, path, shapes, direction) {
+            const transform = Mat4.identity(); // Start with an identity transform for the starship
+            super(transform, materials, direction); // Assuming materials.starship is the material for the starship
+            this.path = path; // Store the path for movement
+            this.shapes = shapes; // Store the shapes for the starship
         }
 
+        update(t) {
+            // Here, you'll provide the specific logic for updating the starship's position and orientation
+            const position_along_path = (t * this.path.speed) % 1;
+            console.log("speed", this.path.speed)
+            // Interpolate between the start and end points based on the position along the path.
+            const new_position = this.path.start.mix(this.path.end, position_along_path);
+
+            // Calculate the orientation of the starship based on the direction of travel.
+            const forward_vector = this.path.end.minus(this.path.start).normalized();
+            const angle = Math.atan2(forward_vector[1], forward_vector[0]);
+
+            // Adjust the angle by 180 degrees if the direction is from right to left.
+            const corrected_angle = this.direction[0] < 0 ? angle + Math.PI : angle;
+
+            // Update the transform for the starship with the new position and rotation.
+            this.transform = Mat4.translation(...new_position)
+                .times(Mat4.rotation(corrected_angle, 0, 0, 1));
+        }
+
+        draw(context, program_state) {
+            // Start with the current transform and apply additional transformations
+            let model_transform = this.transform;
+            model_transform = model_transform
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
+                .times(Mat4.rotation(Math.PI / 2, -1, 0, 0))
+            // Body of the starship
+            if (this.direction[0] < 0) {
+                model_transform = model_transform.times(Mat4.rotation(Math.PI, 0, 0, 1)); // Rotate 180 degrees around the y-axis
+            }
+
+            let body_transform = model_transform.times(Mat4.scale(1.5, 1.5, 1));
+            console.log(this.materials)
+            this.shapes.body.draw(context, program_state, body_transform, this.materials.body);
+
+            // Pole
+            const pole_height = 5;
+            const pole_radius = 0.1;
+            let pole_transform = model_transform.times(Mat4.translation(0.6, 1.5, pole_height / 2))
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+                .times(Mat4.scale(pole_radius, pole_height / 2, pole_radius));
+            this.shapes.pole.draw(context, program_state, pole_transform, this.materials.pole);
+
+            // Flag
+            const flag_width = 1;
+            const flag_height = 0.5;
+            let flag_transform = model_transform
+                .times(Mat4.translation(0.6, 0.4, pole_height - 0.5))
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
+                .times(Mat4.scale(flag_width, flag_height, 1))
+            this.shapes.flag.draw(context, program_state, flag_transform, this.materials.flag);
+
+            // Wheels
+            const wheel_radius = 0.4;
+            const vert_offset = 1.3;
+            const wheel_width = 0.5;
+            const front_back_offset = 1;
+            const side_offset = 1.2;
+            const wheel_offsets = [
+                vec3(-front_back_offset, -side_offset, -vert_offset),
+                vec3(front_back_offset, -side_offset, -vert_offset),
+                vec3(-front_back_offset, side_offset, -vert_offset),
+                vec3(front_back_offset, side_offset, -vert_offset)
+            ];
+
+            for (const offset of wheel_offsets) {
+                let wheel_transform = model_transform.times(Mat4.translation(...offset))
+                    .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+                    .times(Mat4.scale(wheel_radius, wheel_radius, wheel_width));
+                this.shapes.wheel.draw(context, program_state, wheel_transform, this.materials.wheel);
+            }
+        }
     }
 
 
-
-
 const Van = defs.Van =
-    class Van extends Shape {
-        // The Car class contains a cube for the body and four tori for the wheels
-        constructor() {
-            super("position", "normal", "texture_coord");
+    class Van extends Vehicle {
+        constructor(materials, path, shapes, direction) {
+            const transform = Mat4.identity(); // Start with an identity transform for the van
+            super(transform, materials, direction); // Assuming materials.van is the material for the van
+            this.path = path; // Store the path for movement
+            this.shapes = shapes; // Store the shapes for the van
+            // Define the rest of the van's specific shapes and transformations if needed
+        }
 
-            // Van body - a cube scaled to be 2 units taller than the car
-            Cube.insert_transformed_copy_into(this, [], Mat4.scale(3, 2, 2)); // if the car's y-scale was 2, the van's y-scale is now 4
+        update(t) {
+            // Update van position based on the path and time
+            const position_along_path = (t * this.path.speed) % 1;
+            const new_position = this.path.start.mix(this.path.end, position_along_path);
 
+            // Calculate the orientation of the van based on the direction of travel.
+            const forward_vector = this.path.end.minus(this.path.start).normalized();
+            const angle = Math.atan2(forward_vector[1], forward_vector[0]);
+            const corrected_angle = this.direction[0] < 0 ? angle + Math.PI : angle;
+
+            // Update the transform for the van with the new position and rotation.
+            this.transform = Mat4.translation(...new_position)
+                .times(Mat4.rotation(corrected_angle, 0, 0, 1));
+        }
+
+        draw(context, program_state) {
+            // Start with the current transform and apply additional transformations
+            let model_transform = this.transform;
+            model_transform = model_transform
+            .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+
+            if (this.direction[0] < 0) {
+                model_transform = model_transform.times(Mat4.rotation(Math.PI, 0, 1, 0)); // Rotate 180 degrees around the y-axis if needed
+            }
+            
+            // Draw the body of the van
+            let body_transform = model_transform.times(Mat4.scale(3, 2, 2));
+            
+            this.shapes.body.draw(context, program_state, body_transform, this.materials.body);
 
             // Wheel placement calculations:
             const wheel_radius = 0.8;
@@ -118,33 +189,54 @@ const Van = defs.Van =
                 Mat4.translation(front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width))
             ];
 
-            // Add four tori for the wheels, transformed to their respective locations:
             for (const transform of wheel_transforms) {
-                Torus.insert_transformed_copy_into(this, [15, 15], transform);
+                let wheel_transform = model_transform.times(transform);
+                this.shapes.wheel.draw(context, program_state, wheel_transform, this.materials.wheel);
             }
-        }
 
+        }
     }
 
 
+    const Car = defs.Car =
+    class Car extends Vehicle {
+        constructor(materials, path, shapes, direction) {
+            const transform = Mat4.identity(); // Start with an identity transform for the car
+            super(transform, materials, direction); // Assuming materials.car is the material for the car
+            this.path = path; // Store the path for movement
+            this.shapes = shapes; // Store the shapes for the car
+        }
 
+        update(t) {
+            // Update car position based on the path and time
+            const position_along_path = (t * this.path.speed) % 1;
+            const new_position = this.path.start.mix(this.path.end, position_along_path);
 
+            // Calculate the orientation of the car based on the direction of travel.
+            const forward_vector = this.path.end.minus(this.path.start).normalized();
+            const angle = Math.atan2(forward_vector[1], forward_vector[0]);
+            const corrected_angle = this.direction[0] < 0 ? angle + Math.PI : angle;
 
-const Car = defs.Car =
-    class Car extends Shape {
-        // The Car class contains a cube for the body and four tori for the wheels
-        constructor() {
-            // Call the constructor of the Shape superclass:
-            super("position", "normal", "texture_coord");
+            // Update the transform for the car with the new position and rotation.
+            this.transform = Mat4.translation(...new_position)
+                .times(Mat4.rotation(corrected_angle, 0, 0, 1));
+        }
 
-            Cube.insert_transformed_copy_into(this, [], Mat4.scale(1.8, 2, 1));
+        draw(context, program_state) {
+            // Start with the current transform and apply additional transformations
+            let model_transform = this.transform;
+            model_transform = model_transform
+            .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+            // Draw the body of the car
+            let body_transform = model_transform.times(Mat4.scale(1.8, 2, 1));
+            this.shapes.body.draw(context, program_state, body_transform, this.materials.body);
 
-            // Hood - a smaller cube, flat and wide
-            const hood_transform = Mat4.translation(2.1, 0, -0.27) // Move it forward and up a bit
-                .times(Mat4.scale(.3, 2, 0.7)); // Scale it down to hood size
-            Cube.insert_transformed_copy_into(this, [], hood_transform);
+            // Draw the hood of the car
+            let hood_transform = model_transform.times(Mat4.translation(2.1, 0, -0.27))
+                                                .times(Mat4.scale(.3, 2, 0.7));
+            this.shapes.hood.draw(context, program_state, hood_transform, this.materials.hood);
 
-            // Wheel placement calculations:
+            // Wheel placement calculations (same as in your current Car class)
             const wheel_radius = 0.5;
             const vert_offset = 1.2
             const wheel_width = 0.5;
@@ -156,85 +248,15 @@ const Car = defs.Car =
                 Mat4.translation(-front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width)),
                 Mat4.translation(front_back_offset, side_offset, -vert_offset).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(wheel_radius, wheel_radius, wheel_width))
             ];
-
-
-
-
-
-
-            // Add four tori for the wheels, transformed to their respective locations:
+            // Draw the wheels
             for (const transform of wheel_transforms) {
-                Torus.insert_transformed_copy_into(this, [15, 15], transform);
+                let wheel_transform = model_transform.times(transform);
+                this.shapes.wheel.draw(context, program_state, wheel_transform, this.materials.wheel);
             }
         }
     }
 
 
-
-
-
-
-const CarCube = defs.CarCube =
-    class CarCube extends Shape {
-        constructor() {
-            super("position", "normal", "texture_coord");
-            this.arrays.position = [
-                // Back face
-                vec3(-0.5, -0.5, -0.5), vec3(0.5, -0.5, -0.5), vec3(0.5, 0.5, -0.5), vec3(-0.5, 0.5, -0.5),
-                // Front face
-                vec3(-0.5, -0.5, 0.5), vec3(0.5, -0.5, 0.5), vec3(0.5, 0.5, 0.5), vec3(-0.5, 0.5, 0.5),
-                // Top face
-                vec3(-0.5, 0.5, -0.5), vec3(0.5, 0.5, -0.5), vec3(0.5, 0.5, 0.5), vec3(-0.5, 0.5, 0.5),
-                // Bottom face
-                vec3(-0.5, -0.5, -0.5), vec3(0.5, -0.5, -0.5), vec3(0.5, -0.5, 0.5), vec3(-0.5, -0.5, 0.5),
-                // Right face
-                vec3(0.5, -0.5, -0.5), vec3(0.5, 0.5, -0.5), vec3(0.5, 0.5, 0.5), vec3(0.5, -0.5, 0.5),
-                // Left face
-                vec3(-0.5, -0.5, -0.5), vec3(-0.5, 0.5, -0.5), vec3(-0.5, 0.5, 0.5), vec3(-0.5, -0.5, 0.5)
-            ];
-            this.arrays.normal = [
-                // Back face
-                vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1), vec3(0, 0, -1),
-                // Front face
-                vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1),
-                // Top face
-                vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0), vec3(0, 1, 0),
-                // Bottom face
-                vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0), vec3(0, -1, 0),
-                // Right face
-                vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0), vec3(1, 0, 0),
-                // Left face
-                vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0), vec3(-1, 0, 0)
-            ];
-    
-            this.arrays.texture_coord = [
-                // Back face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Front face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Top face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Bottom face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Right face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1),
-                // Left face
-                vec(0, 0), vec(1, 0), vec(1, 1), vec(0, 1)
-            ];
-    
-    
-    
-            // Define the indices for the cube, 2 triangles per face
-            this.indices = [
-                0, 1, 2, 0, 2, 3,     // Back face
-                4, 5, 6, 4, 6, 7,     // Front face
-                8, 9, 10, 8, 10, 11,  // Top face
-                12, 13, 14, 12, 14, 15, // Bottom face
-                16, 17, 18, 16, 18, 19, // Right face
-                20, 21, 22, 20, 22, 23  // Left face
-            ];
-        }    
-    }
 
 
 
@@ -381,6 +403,50 @@ const Cube = defs.Cube =
         }
     }
 
+const Rock = defs.Rock =
+    class Rock extends Cube {
+        constructor() {
+            super();
+            this.body = new Cube;
+            this.topCube = new Cube;
+        }
+        draw (context, program_state, model_transform, material) {
+            let rock_transform = model_transform;
+            this.body.draw(context, program_state, rock_transform, material);
+            let rockTop_transform = rock_transform
+                .times(Mat4.scale(0.5,0.5,0.5))
+                .times(Mat4.translation(0,2,0));
+            this.topCube.draw(context, program_state, rockTop_transform, material);
+
+        }
+    }
+
+
+// (**) To scale floor, divide dimension(length x width) by 2 and add 1 and put these values in the floor_transforms scale transformation (only for even dimensions)
+// When positioning objects in Assignment3.js, translate using Right Hand Rule, where length becomes x, width becomes z to account for rotation
+// Ex) If you want 40 x 40 grid, do scale (21, 21, 0.1) down below
+// With origin being Mat4.identity(), this extends 20 units right from origin, 20 units left from origin (same for top/bottom)
+// To position object, move to Assignment 3 and translate. In this case:
+//      top right corner would be translation(20, 0, -20) where length is x and width is z
+//      middle right edge would be translation (20, 0, 0)
+//      bottom right corner would be translation (20, 0, 20)
+const Floor = defs.Floor =
+    class Floor extends Cube {
+        constructor() {
+            super();
+            this.body = new Cube;
+        }
+        draw (context, program_state, model_transform, material) {
+            let floor_transform = Mat4.identity()
+                .times(Mat4.translation(0,-1.1,0))      // minor edit so objects can be directly placed on top of floor
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates floor to be flat
+                .times(Mat4.scale(21, 21, 0.1))     // (**) flattened and scaled
+            this.body.draw(context, program_state, floor_transform, material);
+        }
+
+    }
+
+
 
 const Subdivision_Sphere = defs.Subdivision_Sphere =
     class Subdivision_Sphere extends Shape {
@@ -427,7 +493,7 @@ const Subdivision_Sphere = defs.Subdivision_Sphere =
                         if (tex[q[0]][0] < 0.5) {
                             this.indices[q[1]] = this.arrays.position.length;
                             this.arrays.position.push(this.arrays.position[q[0]].copy());
-                            this.arrays.normal.push(this.arrays.normal  [q[0]].copy());
+                            this.arrays.normal.push(this.arrays.normal[q[0]].copy());
                             tex.push(tex[q[0]].plus(vec(1, 0)));
                         }
                     }
@@ -488,7 +554,7 @@ const Bear_Body = defs.Bear_Body =
             Subdivision_Sphere.insert_transformed_copy_into(this, [4], bear_body_mt);
 
             let tail = Mat4.identity();
-            tail = tail.times(Mat4.translation(0,-2.3,-0.85));
+            tail = tail.times(Mat4.translation(0, -2.3, -0.85));
             tail = tail.times(Mat4.scale(0.3, 0.3, 0.3));
             Subdivision_Sphere.insert_transformed_copy_into(this, [4], tail);
         }
@@ -500,7 +566,7 @@ const Bear_Face = defs.Bear_Face =
         constructor() {
             super("position", "normal", "texture_coord");
             let nose = Mat4.identity();
-            nose = nose.times(Mat4.translation(0,0.2,1.3));
+            nose = nose.times(Mat4.translation(0, 0.2, 1.3));
             nose = nose.times(Mat4.scale(0.15, 0.1, 0.075));
             Subdivision_Sphere.insert_transformed_copy_into(this, [4], nose);
 
@@ -523,13 +589,13 @@ const Bear_Limbs1 = defs.Bear_Limbs1 =
             super("position", "normal", "texture_coord");
             let r_bear_arm = Mat4.identity();
             r_bear_arm = r_bear_arm.times(Mat4.translation(1, -1.3, 0));
-            r_bear_arm = r_bear_arm.times(Mat4.rotation(3.75, 0,0,1));
+            r_bear_arm = r_bear_arm.times(Mat4.rotation(3.75, 0, 0, 1));
             r_bear_arm = r_bear_arm.times(Mat4.scale(0.4, 0.7, 0.4));
             Subdivision_Sphere.insert_transformed_copy_into(this, [4], r_bear_arm);
 
             let l_bear_leg = Mat4.identity();
             l_bear_leg = l_bear_leg.times(Mat4.translation(-0.75, -2.5, 0));
-            l_bear_leg = l_bear_leg.times(Mat4.scale(0.4,0.7,0.4));
+            l_bear_leg = l_bear_leg.times(Mat4.scale(0.4, 0.7, 0.4));
             Subdivision_Sphere.insert_transformed_copy_into(this, [4], l_bear_leg);
 
         }
@@ -541,13 +607,13 @@ const Bear_Limbs2 = defs.Bear_Limbs2 =
             super("position", "normal", "texture_coord");
             let l_bear_arm = Mat4.identity();
             l_bear_arm = l_bear_arm.times(Mat4.translation(-1, -1.3, 0));
-            l_bear_arm = l_bear_arm.times(Mat4.rotation(-3.75, 0,0,1));
+            l_bear_arm = l_bear_arm.times(Mat4.rotation(-3.75, 0, 0, 1));
             l_bear_arm = l_bear_arm.times(Mat4.scale(0.4, 0.7, 0.4));
             Subdivision_Sphere.insert_transformed_copy_into(this, [4], l_bear_arm);
 
             let r_bear_leg = Mat4.identity();
             r_bear_leg = r_bear_leg.times(Mat4.translation(0.75, -2.5, 0));
-            r_bear_leg = r_bear_leg.times(Mat4.scale(0.4,0.7,0.4));
+            r_bear_leg = r_bear_leg.times(Mat4.scale(0.4, 0.7, 0.4));
             Subdivision_Sphere.insert_transformed_copy_into(this, [4], r_bear_leg);
         }
     }
@@ -654,6 +720,37 @@ const Cylindrical_Tube = defs.Cylindrical_Tube =
         }
     }
 
+const Tree = defs.Tree =
+    class Tree extends Shape {
+        constructor() {
+            super();
+            this.stump = new Cylindrical_Tube(20,20);
+            this.top = new Cube;
+        }
+        draw (context, program_state, model_transform, stump_material, tree_top_material) {
+            // stump transformations
+            let stump_transform = model_transform
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotate cylinder to be vertical
+                .times(Mat4.scale(1, 1, 2))     // scale cylinder to be longer
+            // draws stump
+            this.stump.draw(context, program_state, stump_transform, stump_material);
+            stump_transform = stump_transform
+                .times(Mat4.scale(1, 1, 0.5))   // revert stump rotations
+                .times(Mat4.rotation(Math.PI/2, -1, 0, 0))
+
+            let treeTop_transform = stump_transform
+                .times(Mat4.translation(0, 2, 0));  // first box starts at top of cylinder
+            // draws first box for top part of tree
+            this.top.draw(context, program_state, treeTop_transform, tree_top_material)
+            treeTop_transform = treeTop_transform
+                .times(Mat4.translation(0, 2, 0))   // add another box on top of first box
+            // draws second box for top part of tree
+            this.top.draw(context, program_state, treeTop_transform, tree_top_material)
+
+        }
+    }
+
+
 const Cone_Tip = defs.Cone_Tip =
     class Cone_Tip extends Surface_Of_Revolution {
         // Note:  Touches the Z axis; squares degenerate into triangles as they sweep around.
@@ -665,7 +762,7 @@ const Cone_Tip = defs.Cone_Tip =
 const Torus = defs.Torus =
     class Torus extends Shape {
         // Build a donut shape.  An example of a surface of revolution.
-        constructor(rows, columns, texture_range=[[0, 1], [0, 1]]) {
+        constructor(rows, columns, texture_range = [[0, 1], [0, 1]]) {
             super("position", "normal", "texture_coord");
             const circle_points = Array(rows).fill(vec3(1 / 3, 0, 0))
                 .map((p, i, a) => Mat4.translation(-2 / 3, 0, 0)
@@ -771,9 +868,9 @@ const Minimal_Webgl_Demo = defs.Minimal_Webgl_Demo =
         constructor(webgl_manager, control_panel) {
             super(webgl_manager, control_panel);
             // Don't create any DOM elements to control this scene:
-            this.widget_options = {make_controls: false, show_explanation: false};
+            this.widget_options = { make_controls: false, show_explanation: false };
             // Send a Triangle's vertices to the GPU's buffers:
-            this.shapes = {triangle: new Minimal_Shape()};
+            this.shapes = { triangle: new Minimal_Shape() };
             this.shader = new Basic_Shader();
         }
 
@@ -1025,7 +1122,7 @@ const Phong_Shader = defs.Phong_Shader =
             // within this function, one data field at a time, to fully initialize the shader for a draw.
 
             // Fill in any missing fields in the Material object with custom defaults for this shader:
-            const defaults = {color: color(0, 0, 0, 1), ambient: 0, diffusivity: 1, specularity: 1, smoothness: 40};
+            const defaults = { color: color(0, 0, 0, 1), ambient: 0, diffusivity: 1, specularity: 1, smoothness: 40 };
             material = Object.assign({}, defaults, material);
 
             this.send_material(context, gpu_addresses, material);
@@ -1158,7 +1255,7 @@ const Movement_Controls = defs.Movement_Controls =
         add_mouse_controls(canvas) {
             // add_mouse_controls():  Attach HTML mouse events to the drawing canvas.
             // First, measure mouse steering, for rotating the flyaround camera:
-            this.mouse = {"from_center": vec(0, 0)};
+            this.mouse = { "from_center": vec(0, 0) };
             const mouse_position = (e, rect = canvas.getBoundingClientRect()) =>
                 vec(e.clientX - (rect.left + rect.right) / 2, e.clientY - (rect.bottom + rect.top) / 2);
             // Set up mouse response.  The last one stops us from reacting if the mouse leaves the canvas:

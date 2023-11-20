@@ -1,4 +1,4 @@
-import { defs, tiny } from '../examples/common.js';
+/* import { defs, tiny } from '../examples/common.js';
 const { vec, vec3, vec4, color, Mat4, Material, Shape, Vector3, Vector, hex_color } = tiny;
 
 
@@ -169,4 +169,4 @@ export class Tree {
         this.top.draw(context, program_state, treeTop_transform, material.tree_top)
 
     }
-}
+} */
