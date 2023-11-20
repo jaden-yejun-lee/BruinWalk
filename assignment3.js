@@ -17,6 +17,11 @@ export class Assignment3 extends Scene {
             rock: new defs.Rock(),
             tree: new defs.Tree(),
             floor: new defs.Floor(),
+            bear_body: new defs.Bear_Body(),
+            bear_face: new defs.Bear_Face(),
+            bear_limbs1: new defs.Bear_Limbs1(),
+            bear_limbs2: new defs.Bear_Limbs2(),
+
         };
 
         // *** Materials
@@ -32,10 +37,15 @@ export class Assignment3 extends Scene {
             tree_top: new Material(new defs.Phong_Shader(),
                 {color: hex_color("42692F")}),
             floor: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 1, specularity: 1, color: hex_color("90EE90")}),
+                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("90EE90")}),
+            bear: new Material(new defs.Phong_Shader(),
+                { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
         }
 
-
+        this.direction = 1;
+        this.x_movement = 0; //x movement is bound by 0 to 2*x-width of screen
+        this.z_movement = 0; //z movement is bound by -z-width to +z-width of screen
+        this.camera_dx = 0;
 
 
         const starship_shapes = {
@@ -111,19 +121,43 @@ export class Assignment3 extends Scene {
         // Add vehicles to the manager
 
         // adjusted camera back to get more complete view of field
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 40), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.initial_camera_location = Mat4.look_at(vec3(0, 15, 38), vec3(0, 0, 0), vec3(0, 1, 0));
+
     }
 
+    draw_bear(context, program_state, mt, t) {
+        let angle = this.direction*Math.PI/2; //default front, used to face the bear the correct way
+        let theta = 0.2*Math.sin(4*Math.PI*t); //Arm/leg swing angle
+        mt = mt.times(Mat4.translation(this.x_movement, 0, this.z_movement));
+        mt = mt.times(Mat4.rotation(angle, 0, 1, 0)); //Rotate bear to face direction he is walking
+
+        this.shapes.bear_body.draw(context, program_state, mt, this.materials.bear);
+        this.shapes.bear_face.draw(context, program_state, mt, this.materials.bear.override({color: hex_color("#000000")}));
+        mt = mt.times(Mat4.rotation(theta,1, 0, 0));
+        this.shapes.bear_limbs1.draw(context, program_state, mt, this.materials.bear);
+        mt = mt.times(Mat4.rotation(-2*theta,1, 0, 0));
+        this.shapes.bear_limbs2.draw(context, program_state, mt, this.materials.bear);
+    }
     make_control_panel() {
         this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => (this.initial_camera_location));
         this.new_line();
-        this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
-        this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
-        this.new_line();
-        this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
-        this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
-        this.new_line();
-        this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
+        this.key_triggered_button("Up", ['ArrowUp'], () => {
+            if (this.z_movement >-20) {this.z_movement = this.z_movement - 1;}
+            this.direction = 2;
+            this.run = 1;
+        });
+        this.key_triggered_button("Down", ['ArrowDown'], () => {
+            if (this.z_movement < 20) {this.z_movement = this.z_movement + 1;}
+            this.direction = 0;
+            this.run = 1;});
+        this.key_triggered_button("Left", ['ArrowLeft'], () => {
+            if (this.x_movement > 0) {this.x_movement = this.x_movement - 1;}
+            this.direction = 3;
+            this.run = 1;});
+        this.key_triggered_button("Right", ['ArrowRight'], () => {
+            if (this.x_movement < 40) {this.x_movement = this.x_movement + 1;}
+            this.direction = 1;
+            this.run = 1;});
     }
 
     display(context, program_state) {
@@ -131,6 +165,12 @@ export class Assignment3 extends Scene {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             program_state.set_camera(this.initial_camera_location);
         }
+        const t = program_state.animation_time / 1000; // Current time in seconds
+
+        //Update where camera is looking:
+       /* let camera_location = Mat4.look_at(vec3(this.x_movement, 15, 38), vec3(this.x_movement, 0, 0), vec3(0, 1, 0));
+        program_state.set_camera(camera_location);*/
+
         const t = program_state.animation_time / 1000; // Current time in seconds
 
         program_state.projection_transform = Mat4.perspective(
@@ -167,12 +207,44 @@ export class Assignment3 extends Scene {
             this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock)
         }
 
+        //Drawing bear:
+        let bear_mt = Mat4.identity();
+        bear_mt = bear_mt.times(Mat4.translation(-20,2,0));
+        this.draw_bear(context, program_state, bear_mt, t);
+        //this.vehicle_manager.update_and_draw(context, program_state);
+
+        // draws floor
+        this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
+
+        // draws rocks
+        let rock_transform = Mat4.identity();
+        this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
+        //rock_transform = rock_transform.times(Mat4.translation(-8,0,0));
+        //this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
+
+        // draws trees
+        let tree_transform = Mat4.identity()
+            .times(Mat4.translation(10, 0, 0));
+        this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
+        //tree_transform = Mat4.identity().times(Mat4.translation(4,0,0));
+        //this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
+
+        let i = 0;
+
+        // Creates a row of rocks on top side of floor
+        for (i = -20; i <= 20; i += 2) {
+            rock_transform = Mat4.identity();
+            rock_transform = rock_transform.times(Mat4.translation(i, 0, -20));
+            this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock)
+        }
+
         // Creates a row of trees on right side of floor
         for (i = -18; i <= 20; i += 2) {
             tree_transform = Mat4.identity();
             tree_transform = tree_transform.times(Mat4.translation(20, 0, i));
             this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top)
         }
+
 
         // for (let path of this.starship_paths) {
         //     // Calculate the current position along the path
@@ -187,7 +259,6 @@ export class Assignment3 extends Scene {
         //     // Draw the starship at the current position
         //     this.shapes.starship.draw(context, program_state, model_transform, this.materials.starship);
         // }
-
     }
 }
 
