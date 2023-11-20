@@ -57,9 +57,9 @@ export class Assignment3 extends Scene {
         const starship_materials = {
             starship: new Material(new defs.Phong_Shader(), { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
             body: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: grey }),
-            pole: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: white }),
+            pole: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
             flag: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: red }),
             wheel: new Material(new defs.Phong_Shader(),
@@ -73,12 +73,15 @@ export class Assignment3 extends Scene {
         const van_shapes = {
             body: new defs.Cube(),
             wheel: new defs.Torus(15, 15),
+            window: new defs.Cube()
         };
 
         const van_materials = {
             body: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: red }),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: grey }),
             wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            window: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
         };
 
@@ -88,16 +91,23 @@ export class Assignment3 extends Scene {
         const car_shapes = {
             body: new defs.Cube(),
             hood: new defs.Cube(),
-            wheel: new defs.Torus(15, 15)
+            wheel: new defs.Torus(15, 15),
+            driverArea: new defs.Cube(),
+            window: new defs.Cube()
         };
 
         const car_materials = {
             body: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: red }),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFA500") }),
             hood: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#F0F000") }),
-                wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFD580") }),
+            wheel: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            driverArea: new Material(new defs.Phong_Shader(), 
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#F0F0F0") }),
+            window: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+
             // Define other materials if needed
         };
 
@@ -114,8 +124,8 @@ export class Assignment3 extends Scene {
 
         //this.vehicle_manager.add_vehicle(starship1);
         //this.vehicle_manager.add_vehicle(starship2);
-        //this.vehicle_manager.add_vehicle(van);
         this.vehicle_manager.add_vehicle(car);
+        
 
 
         // Add vehicles to the manager
@@ -180,7 +190,7 @@ export class Assignment3 extends Scene {
 
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
-        //this.vehicle_manager.update_and_draw(context, program_state);
+        this.vehicle_manager.update_and_draw(context, program_state);
 
         // draws floor
         this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
@@ -188,15 +198,11 @@ export class Assignment3 extends Scene {
         // draws rocks
         let rock_transform = Mat4.identity();
         this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
-        //rock_transform = rock_transform.times(Mat4.translation(-8,0,0));
-        //this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
 
         // draws trees
         let tree_transform = Mat4.identity()
             .times(Mat4.translation(10, 0, 0));
         this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
-        //tree_transform = Mat4.identity().times(Mat4.translation(4,0,0));
-        //this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
 
         let i = 0;
 
@@ -246,19 +252,6 @@ export class Assignment3 extends Scene {
         }
 
 
-        // for (let path of this.starship_paths) {
-        //     // Calculate the current position along the path
-        //     const position_along_path = (t * path.speed) % 1; // This will be a value between 0 and 1
-        //     // Interpolate between the start and end points based on position_along_path
-        //     let model_transform = Mat4.identity()
-        //         .times(Mat4.translation(...path.start.mix(path.end, position_along_path)))
-        //         .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)) 
-        //         .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)) 
-        //         .times(Mat4.rotation(Math.PI / 2, -1, 0, 0));
-
-        //     // Draw the starship at the current position
-        //     this.shapes.starship.draw(context, program_state, model_transform, this.materials.starship);
-        // }
     }
 }
 

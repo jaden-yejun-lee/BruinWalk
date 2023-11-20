@@ -165,15 +165,15 @@ const Van = defs.Van =
             // Start with the current transform and apply additional transformations
             let model_transform = this.transform;
             model_transform = model_transform
-            .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
 
             if (this.direction[0] < 0) {
                 model_transform = model_transform.times(Mat4.rotation(Math.PI, 0, 1, 0)); // Rotate 180 degrees around the y-axis if needed
             }
-            
+
             // Draw the body of the van
             let body_transform = model_transform.times(Mat4.scale(3, 2, 2));
-            
+
             this.shapes.body.draw(context, program_state, body_transform, this.materials.body);
 
             // Wheel placement calculations:
@@ -194,11 +194,41 @@ const Van = defs.Van =
                 this.shapes.wheel.draw(context, program_state, wheel_transform, this.materials.wheel);
             }
 
+            let window_offset_x = 0.8; // X offset (left/right)
+            let window_offset_y = 2.2; // Y offset (up/down)
+            let window_offset_z = 0.7; // Z offset (forward/backward)
+
+            let window_scale_x = 1.5; // Width of the driverArea
+            let window_scale_y = 0.1; // Height of the driverArea
+            let window_scale_z = 0.7; // Depth of the driverArea
+
+            let left_window_transform = model_transform
+                .times(Mat4.translation(window_offset_x, window_offset_y, window_offset_z))
+                .times(Mat4.scale(window_scale_x, window_scale_y, window_scale_z));
+            let right_window_transform = model_transform
+                .times(Mat4.translation(window_offset_x, -window_offset_y, window_offset_z))
+                .times(Mat4.scale(window_scale_x, window_scale_y, window_scale_z));
+            this.shapes.window.draw(context, program_state, left_window_transform, this.materials.window);
+            this.shapes.window.draw(context, program_state, right_window_transform, this.materials.window);
+
+            let front_window_offset_x = 3; // X offset (left/right)
+            let front_window_offset_y = 0; // Y offset (up/down)
+            let front_window_offset_z = 0.75; // Z offset (forward/backward)
+
+            let front_window_scale_x = 0.1; // Width of the driverArea
+            let front_window_scale_y = 1.4; // Height of the driverArea
+            let front_window_scale_z = 0.5; // Depth of the driverArea
+
+            let front_window_transform = model_transform
+                .times(Mat4.translation(front_window_offset_x, front_window_offset_y, front_window_offset_z))
+                .times(Mat4.scale(front_window_scale_x, front_window_scale_y, front_window_scale_z));
+            this.shapes.window.draw(context, program_state, front_window_transform, this.materials.window);
+
         }
     }
 
 
-    const Car = defs.Car =
+const Car = defs.Car =
     class Car extends Vehicle {
         constructor(materials, path, shapes, direction) {
             const transform = Mat4.identity(); // Start with an identity transform for the car
@@ -226,14 +256,17 @@ const Van = defs.Van =
             // Start with the current transform and apply additional transformations
             let model_transform = this.transform;
             model_transform = model_transform
-            .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
             // Draw the body of the car
-            let body_transform = model_transform.times(Mat4.scale(1.8, 2, 1));
+            let body_transform = model_transform
+                .times(Mat4.scale(1.8, 2, 0.7))
+                .times(Mat4.translation(0, 0, -0.3))
+
             this.shapes.body.draw(context, program_state, body_transform, this.materials.body);
 
             // Draw the hood of the car
             let hood_transform = model_transform.times(Mat4.translation(2.1, 0, -0.27))
-                                                .times(Mat4.scale(.3, 2, 0.7));
+                .times(Mat4.scale(.3, 1.2, 0.7));
             this.shapes.hood.draw(context, program_state, hood_transform, this.materials.hood);
 
             // Wheel placement calculations (same as in your current Car class)
@@ -253,6 +286,52 @@ const Van = defs.Van =
                 let wheel_transform = model_transform.times(transform);
                 this.shapes.wheel.draw(context, program_state, wheel_transform, this.materials.wheel);
             }
+
+            let driverArea_offset_x = 0.3; // X offset (left/right)
+            let driverArea_offset_y = 0; // Y offset (up/down)
+            let driverArea_offset_z = 0.9; // Z offset (forward/backward)
+
+            let driverArea_scale_x = 1.2; // Width of the driverArea
+            let driverArea_scale_y = 1.2; // Height of the driverArea
+            let driverArea_scale_z = 0.4; // Depth of the driverArea
+
+            let driverArea_transform = model_transform
+                .times(Mat4.translation(driverArea_offset_x, driverArea_offset_y, driverArea_offset_z))
+                .times(Mat4.scale(driverArea_scale_x, driverArea_scale_y, driverArea_scale_z));
+
+            this.shapes.driverArea.draw(context, program_state, driverArea_transform, this.materials.driverArea);
+
+            let window_offset_x = 0.5; // X offset (left/right)
+            let window_offset_y = 1.2; // Y offset (up/down)
+            let window_offset_z = 0.75; // Z offset (forward/backward)
+
+            let window_scale_x = 0.8; // Width of the driverArea
+            let window_scale_y = 0.1; // Height of the driverArea
+            let window_scale_z = 0.3; // Depth of the driverArea
+
+            let left_window_transform = model_transform
+                .times(Mat4.translation(window_offset_x, window_offset_y, window_offset_z))
+                .times(Mat4.scale(window_scale_x, window_scale_y, window_scale_z));
+            let right_window_transform = model_transform
+                .times(Mat4.translation(window_offset_x, -window_offset_y, window_offset_z))
+                .times(Mat4.scale(window_scale_x, window_scale_y, window_scale_z));
+            this.shapes.window.draw(context, program_state, left_window_transform, this.materials.window);
+            this.shapes.window.draw(context, program_state, right_window_transform, this.materials.window);
+
+            let front_window_offset_x = 1.5; // X offset (left/right)
+            let front_window_offset_y = 0; // Y offset (up/down)
+            let front_window_offset_z = 0.75; // Z offset (forward/backward)
+
+            let front_window_scale_x = 0.1; // Width of the driverArea
+            let front_window_scale_y = 1.0; // Height of the driverArea
+            let front_window_scale_z = 0.3; // Depth of the driverArea
+
+            let front_window_transform = model_transform
+                .times(Mat4.translation(front_window_offset_x, front_window_offset_y, front_window_offset_z))
+                .times(Mat4.scale(front_window_scale_x, front_window_scale_y, front_window_scale_z));
+            this.shapes.window.draw(context, program_state, front_window_transform, this.materials.window);
+
+
         }
     }
 
@@ -1357,7 +1436,7 @@ const Movement_Controls = defs.Movement_Controls =
             // past a minimum distance (leeway) from the canvas's center:
             if (!this.look_around_locked)
                 // If steering, steer according to "mouse_from_center" vector, but don't
-                // start increasing until outside a leeway window from the center.
+                // start increasing until outside a leeway driverArea from the center.
                 for (let i = 0; i < 2; i++) {                                     // The &&'s in the next line might zero the vectors out:
                     let o = offsets_from_dead_box,
                         velocity = ((o.minus[i] > 0 && o.minus[i]) || (o.plus[i] < 0 && o.plus[i])) * radians_per_frame;
