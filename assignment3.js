@@ -44,7 +44,7 @@ export class Assignment3 extends Scene {
         this.direction = 1;
         this.x_movement = 0; //x movement is bound by 0 to 2*x-width of screen
         this.z_movement = 0; //z movement is bound by -z-width to +z-width of screen
-
+        this.camera_dx = 0;
 
         const starship_shapes = {
             body: new defs.Cube(),
@@ -119,7 +119,7 @@ export class Assignment3 extends Scene {
         // Add vehicles to the manager
 
         // adjusted camera back to get more complete view of field
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 40), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.initial_camera_location = Mat4.look_at(vec3(0, 15, 38), vec3(0, 0, 0), vec3(0, 1, 0));
     }
 
     draw_bear(context, program_state, mt, t) {
@@ -162,6 +162,11 @@ export class Assignment3 extends Scene {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             program_state.set_camera(this.initial_camera_location);
         }
+
+        //Update where camera is looking:
+       /* let camera_location = Mat4.look_at(vec3(this.x_movement, 15, 38), vec3(this.x_movement, 0, 0), vec3(0, 1, 0));
+        program_state.set_camera(camera_location);*/
+
         const t = program_state.animation_time / 1000; // Current time in seconds
 
         program_state.projection_transform = Mat4.perspective(
