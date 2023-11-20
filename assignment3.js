@@ -114,8 +114,7 @@ export class Assignment3 extends Scene {
 
         //this.vehicle_manager.add_vehicle(starship1);
         //this.vehicle_manager.add_vehicle(starship2);
-        //this.vehicle_manager.add_vehicle(van);
-        this.vehicle_manager.add_vehicle(van);
+        this.vehicle_manager.add_vehicle(car);
         
 
 
@@ -151,7 +150,7 @@ export class Assignment3 extends Scene {
 
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
-        //this.vehicle_manager.update_and_draw(context, program_state);
+        this.vehicle_manager.update_and_draw(context, program_state);
 
         // draws floor
         this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
@@ -159,15 +158,11 @@ export class Assignment3 extends Scene {
         // draws rocks
         let rock_transform = Mat4.identity();
         this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
-        //rock_transform = rock_transform.times(Mat4.translation(-8,0,0));
-        //this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
 
         // draws trees
         let tree_transform = Mat4.identity()
             .times(Mat4.translation(10, 0, 0));
         this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
-        //tree_transform = Mat4.identity().times(Mat4.translation(4,0,0));
-        //this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
 
         let i = 0;
 
@@ -185,19 +180,7 @@ export class Assignment3 extends Scene {
             this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top)
         }
 
-        // for (let path of this.starship_paths) {
-        //     // Calculate the current position along the path
-        //     const position_along_path = (t * path.speed) % 1; // This will be a value between 0 and 1
-        //     // Interpolate between the start and end points based on position_along_path
-        //     let model_transform = Mat4.identity()
-        //         .times(Mat4.translation(...path.start.mix(path.end, position_along_path)))
-        //         .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)) 
-        //         .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)) 
-        //         .times(Mat4.rotation(Math.PI / 2, -1, 0, 0));
-
-        //     // Draw the starship at the current position
-        //     this.shapes.starship.draw(context, program_state, model_transform, this.materials.starship);
-        // }
+     
 
     }
 }
