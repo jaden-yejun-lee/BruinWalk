@@ -19,9 +19,9 @@ export class Assignment3 extends Scene {
         const starship_materials = {
             starship: new Material(new defs.Phong_Shader(), { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
             body: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: grey }),
-            pole: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: white }),
+            pole: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
             flag: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: red }),
             wheel: new Material(new defs.Phong_Shader(),
@@ -35,12 +35,15 @@ export class Assignment3 extends Scene {
         const van_shapes = {
             body: new defs.Cube(),
             wheel: new defs.Torus(15, 15),
+            window: new defs.Cube()
         };
 
         const van_materials = {
             body: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: red }),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: grey }),
             wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            window: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
         };
 
@@ -50,16 +53,23 @@ export class Assignment3 extends Scene {
         const car_shapes = {
             body: new defs.Cube(),
             hood: new defs.Cube(),
-            wheel: new defs.Torus(15, 15)
+            wheel: new defs.Torus(15, 15),
+            driverArea: new defs.Cube(),
+            window: new defs.Cube()
         };
 
         const car_materials = {
             body: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: red }),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFA500") }),
             hood: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#F0F000") }),
-                wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFD580") }),
+            wheel: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            driverArea: new Material(new defs.Phong_Shader(), 
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#F0F0F0") }),
+            window: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+
             // Define other materials if needed
         };
 
@@ -77,12 +87,8 @@ export class Assignment3 extends Scene {
         //this.vehicle_manager.add_vehicle(starship1);
         //this.vehicle_manager.add_vehicle(starship2);
         //this.vehicle_manager.add_vehicle(van);
-        this.vehicle_manager.add_vehicle(car);
-        this.shapes = {
-            car: new defs.Car(),
-            //starship: new defs.Starship(),
-
-        };
+        this.vehicle_manager.add_vehicle(van);
+        
 
         // Add vehicles to the manager
 
