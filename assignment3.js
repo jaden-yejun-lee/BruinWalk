@@ -28,20 +28,50 @@ export class Assignment3 extends Scene {
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
 
         }
-
+        this.direction = 0;
+        this.x_movement = 0;
+        this.z_movement = 0;
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
     }
 
+    draw_bear(context, program_state, mt, t) {
+        let angle = this.direction*Math.PI/2; //default front
+        let d_x = this.x_movement;
+        let d_z = this.z_movement;
+        mt = mt.times(Mat4.translation(d_x, 0, d_z));
+        mt = mt.times(Mat4.rotation(angle, 0, 1, 0));
+        let mt2 = mt;
+        let mt1 = mt;
+
+        let theta = 0.2*Math.sin(4*Math.PI*t);
+        mt1 = mt1.times(Mat4.rotation(theta,1, 0, 0));
+        mt2 = mt2.times(Mat4.rotation(-theta,1, 0, 0));
+        this.shapes.bear_body.draw(context, program_state, mt, this.materials.bear);
+        this.shapes.bear_face.draw(context, program_state, mt, this.materials.bear.override({color: hex_color("#000000")}));
+        this.shapes.bear_limbs1.draw(context, program_state, mt1, this.materials.bear);
+        this.shapes.bear_limbs2.draw(context, program_state, mt2, this.materials.bear);
+
+    }
     make_control_panel() {
         this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => (this.initial_camera_location));
         this.new_line();
-        this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
-        this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
-        this.new_line();
-        this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
-        this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
-        this.new_line();
-        this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
+        this.key_triggered_button("Up", ['ArrowUp'], () => {
+            this.z_movement = this.z_movement - 1;
+            this.direction = 2;
+            this.run = 1;
+        });
+        this.key_triggered_button("Down", ['ArrowDown'], () => {
+            this.z_movement = this.z_movement + 1;
+            this.direction = 0;
+            this.run = 1;});
+        this.key_triggered_button("Left", ['ArrowLeft'], () => {
+            this.x_movement = this.x_movement - 1;
+            this.direction = 3;
+            this.run = 1;});
+        this.key_triggered_button("Right", ['ArrowRight'], () => {
+            this.x_movement = this.x_movement + 1;
+            this.direction = 1;
+            this.run = 1;});
     }
 
     display(context, program_state) {
@@ -57,20 +87,10 @@ export class Assignment3 extends Scene {
 
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
-
-        //this.shapes.car_cube.draw(context, program_state, model_transform, this.materials.car_cube);
-        let testbearmt = Mat4.identity();
-        this.shapes.bear_body.draw(context, program_state, testbearmt, this.materials.bear);
-        this.shapes.bear_face.draw(context, program_state, testbearmt, this.materials.bear.override({color: hex_color("#000000")}));
+        //Drawing bear:
         const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
-
-        let theta = 0.2*Math.sin(4*Math.PI*t);
-        let testbearmt2 = testbearmt;
-        testbearmt = testbearmt.times(Mat4.rotation(theta,1, 0, 0));
-        this.shapes.bear_limbs1.draw(context, program_state, testbearmt, this.materials.bear);
-        testbearmt2 = testbearmt2.times(Mat4.rotation(-theta,1, 0, 0));
-        this.shapes.bear_limbs2.draw(context, program_state, testbearmt2, this.materials.bear);
-
+        const bear_mt = Mat4.identity();
+        this.draw_bear(context, program_state, bear_mt, t);
     }
 }
 
