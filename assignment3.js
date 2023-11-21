@@ -66,8 +66,8 @@ export class Assignment3 extends Scene {
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
         };
 
-        const starship_path1 = { start: vec3(-10, 0, 2), end: vec3(10, 0, 2), speed: 0.5 };
-        const starship_path2 = { start: vec3(10, 0, 4), end: vec3(-10, 0, 4), speed: 0.5 };
+        const starship_path1 = { start: vec3(-4, 0, -10), end: vec3(-4, 0, 20), speed: 0.5 };
+        const starship_path2 = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.5 };
 
 
         const van_shapes = {
@@ -85,8 +85,8 @@ export class Assignment3 extends Scene {
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
         };
 
-        const van_path = { start: vec3(10, 0, 2), end: vec3(-10, 0, 2), speed: 0.5 };
-        const van_direction = vec3(-1, 0, 0); // For van going right to left
+        const van_path = { start: vec3(14, 0, 20), end: vec3(14, 0, -10), speed: 0.5 };
+        const van_direction = vec3(0, -1, 0); // For van going right to left
 
         const car_shapes = {
             body: new defs.Cube(),
@@ -111,20 +111,20 @@ export class Assignment3 extends Scene {
             // Define other materials if needed
         };
 
-        const car_path = { start: vec3(0, 0, 10), end: vec3(0, 0, -10), speed: 0.5 };
+        const car_path = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.5 };
         const car_direction = vec3(0, -1, 0);
 
 
         this.vehicle_manager = new VehicleManager();
 
         const starship1 = new defs.Starship(starship_materials, starship_path1, starship_shapes);
-        const starship2 = new defs.Starship(starship_materials, starship_path2, starship_shapes, vec3(-1, 0, 0));
+        const starship2 = new defs.Starship(starship_materials, starship_path2, starship_shapes, vec3(0, 1, 0));
         const van = new defs.Van(van_materials, van_path, van_shapes, van_direction);
         const car = new defs.Car(car_materials, car_path, car_shapes, car_direction);
 
         this.vehicle_manager.add_vehicle(starship1);
-        this.vehicle_manager.add_vehicle(starship2);
-        //this.vehicle_manager.add_vehicle(car);
+        this.vehicle_manager.add_vehicle(van);
+        this.vehicle_manager.add_vehicle(car);
         
 
 

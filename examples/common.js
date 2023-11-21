@@ -84,8 +84,9 @@ const Starship = defs.Starship =
             // Start with the current transform and apply additional transformations
             let model_transform = this.transform;
             model_transform = model_transform
-                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
                 .times(Mat4.rotation(Math.PI / 2, -1, 0, 0))
+                .times(Mat4.translation(0, 0, 0.7))
+
             // Body of the starship
             if (this.direction[0] < 0) {
                 model_transform = model_transform.times(Mat4.rotation(Math.PI, 0, 0, 1)); // Rotate 180 degrees around the y-axis
@@ -129,6 +130,7 @@ const Starship = defs.Starship =
             for (const offset of wheel_offsets) {
                 let wheel_transform = model_transform.times(Mat4.translation(...offset))
                     .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+                    .times(Mat4.rotation(Math.PI / 2, 0, 1, 0))
                     .times(Mat4.scale(wheel_radius, wheel_radius, wheel_width));
                 this.shapes.wheel.draw(context, program_state, wheel_transform, this.materials.wheel);
             }
@@ -165,7 +167,10 @@ const Van = defs.Van =
             // Start with the current transform and apply additional transformations
             let model_transform = this.transform;
             model_transform = model_transform
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+            .times(Mat4.rotation(Math.PI / 2, -1, 0, 0))
+            .times(Mat4.rotation(Math.PI / 2, 0, 0, 1))
+                
+                .times(Mat4.translation(0, 0, 2))
 
             if (this.direction[0] < 0) {
                 model_transform = model_transform.times(Mat4.rotation(Math.PI, 0, 1, 0)); // Rotate 180 degrees around the y-axis if needed
