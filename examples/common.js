@@ -507,6 +507,20 @@ const Rock = defs.Rock =
         }
     }
 
+const Sky = defs.Sky =
+    class Sky extends Cube {
+        constructor() {
+            super();
+            this.body = new Cube;
+        }
+        draw(context, program_state, model_transform, material) {
+            let sky_transform = model_transform
+                .times(Mat4.translation(0, 0, -50))
+                .times(Mat4.rotation(Math.PI / 2, 0, 0, 1))
+                .times(Mat4.scale(500, 500, 0.1));
+            this.body.draw(context, program_state, sky_transform, material);
+        }
+    }
 
 // (**) To scale floor, divide dimension(length x width) by 2 and add 1 and put these values in the floor_transforms scale transformation (only for even dimensions)
 // When positioning objects in Assignment3.js, translate using Right Hand Rule, where length becomes x, width becomes z to account for rotation
@@ -526,13 +540,46 @@ const Floor = defs.Floor =
             let floor_transform = Mat4.identity()
                 .times(Mat4.translation(0,-1.1,0))      // minor edit so objects can be directly placed on top of floor
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates floor to be flat
-                .times(Mat4.scale(21, 21, 0.1))     // (**) flattened and scaled
+                .times(Mat4.scale(41, 31, 0.1))     // (**) flattened and scaled
             this.body.draw(context, program_state, floor_transform, material);
         }
 
     }
 
+const Road = defs.Road =
+    class Road extends Cube {
+        constructor() {
+            super();
+            this.road = new Cube;
+            this.dash = new Cube;
+        }
+        draw (context, program_state, model_transform, road_material, dash_material) {
+            // draw road
+            let road_transform = model_transform
+                .times(Mat4.translation(0,-1.0,0))      // minor edit so objects can be directly placed on top of road
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates road to be flat
+                .times(Mat4.scale(3, 31, 0.1))
+            this.road.draw(context, program_state, road_transform, road_material);
 
+            // draw dashes
+            let num_dashes = 5;
+            let dash_transform = model_transform;
+            for (let i = 0; i < num_dashes; i++) {
+                if (i === 0) {
+                    dash_transform = dash_transform
+                        .times(Mat4.translation(0,-0.99,0))      // minor edit so objects can be directly placed on top of road
+                        .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates road to be flat
+                        .times(Mat4.scale(0.25, 3, 0.1))
+                        .times(Mat4.translation(0,-8,0))
+                }
+                else {
+                    dash_transform = dash_transform
+                        .times(Mat4.translation(0,4,0));
+                }
+                this.dash.draw(context, program_state, dash_transform, dash_material);
+            }
+        }
+    }
 
 const Subdivision_Sphere = defs.Subdivision_Sphere =
     class Subdivision_Sphere extends Shape {

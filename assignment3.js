@@ -7,6 +7,14 @@ const red = color(1, 0, 0, 1); // Red color, fully opaque
 const white = color(1, 1, 1, 1); // White color, fully opaque
 const grey = color(0.5, 0.5, 0.5, 1);
 
+// Obtain random integer between min(inclusive) and max(inclusive)
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * ((max-min)+1) + min);
+}
+
+
 export class Assignment3 extends Scene {
     constructor() {
         super();
@@ -17,6 +25,8 @@ export class Assignment3 extends Scene {
             rock: new defs.Rock(),
             tree: new defs.Tree(),
             floor: new defs.Floor(),
+            sky: new defs.Sky(),
+            road: new defs.Road(),
             bear_body: new defs.Bear_Body(),
             bear_face: new defs.Bear_Face(),
             bear_limbs1: new defs.Bear_Limbs1(),
@@ -31,13 +41,19 @@ export class Assignment3 extends Scene {
             starship: new Material(new defs.Phong_Shader(),
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#F0F0F0") }),
             rock: new Material(new defs.Phong_Shader(),
-                {ambient: 1, color: hex_color("5A5A5A")}),
+                {ambient: 1, color: hex_color("#5A5A5A")}),
             tree_stump: new Material(new defs.Phong_Shader(),
-                {color: hex_color("8B4513")}),
+                {color: hex_color("#8B4513")}),
             tree_top: new Material(new defs.Phong_Shader(),
-                {color: hex_color("42692F")}),
+                {color: hex_color("#42692F")}),
             floor: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("90EE90")}),
+                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#90EE90")}),
+            sky: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#87CEEB")}),
+            road: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#777B7E")}),
+            road_dash: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#FFFF00")}),
             bear: new Material(new defs.Phong_Shader(),
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
         }
@@ -46,6 +62,32 @@ export class Assignment3 extends Scene {
         this.x_movement = 0; //x movement is bound by 0 to 2*x-width of screen
         this.z_movement = 0; //z movement is bound by -z-width to +z-width of screen
         this.camera_dx = 0;
+
+        this.rock_positions = [];
+        this.tree_positions = [];
+
+        // 40 x 30 field
+        let field_length = 40;    // horizontal length of field
+        let field_width = 30;     // vertical width of field
+
+        let i = 0;
+        let j = 0;
+
+        // randomly populate field with rocks and trees
+        // if randomInt = 1 -> rock, 2 -> tree, rest -> blank square
+        for (i = -field_length + 4; i <= field_length - 4; i += 2) {    // give bear 2 columns of space with no blocks at start and end
+            for (j = -field_width; j <= field_width; j += 2) {
+                let randomInt = getRandomInt(1,30);      // gets random int between 1 and 30 (increase range to make field less dense)
+                 console.log(randomInt)
+                if (randomInt === 1) {
+                    this.rock_positions.push(vec3(i,0,j));      // stores position in rock_positions array
+                }
+                else if (randomInt === 2) {
+                    this.tree_positions.push(vec3(i,0,j));      // stores position in tree_positions array
+                }
+            }
+        }
+
 
 
         const starship_shapes = {
@@ -194,7 +236,17 @@ export class Assignment3 extends Scene {
         // draws floor
         this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
 
+        // draws road
+        let road_transform= Mat4.identity();
+        road_transform = road_transform.times(Mat4.translation(-4,0,0)); // translates road to designated position on field
+        this.shapes.road.draw(context, program_state, road_transform, this.materials.road, this.materials.road_dash);
 
+        // second road
+        road_transform = road_transform.times(Mat4.translation(8,0,0)); // translates road to designated position on field
+        this.shapes.road.draw(context, program_state, road_transform, this.materials.road, this.materials.road_dash);
+
+        // draws sky
+        this.shapes.sky.draw(context, program_state, Mat4.identity(), this.materials.sky);
 
         //Drawing bear:
         let bear_mt = Mat4.identity();
@@ -202,39 +254,16 @@ export class Assignment3 extends Scene {
         this.draw_bear(context, program_state, bear_mt, t);
         //this.vehicle_manager.update_and_draw(context, program_state);
 
-        // draws floor
-        this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
-
-        // draws rocks
-        let rock_transform = Mat4.identity();
-        this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
-        //rock_transform = rock_transform.times(Mat4.translation(-8,0,0));
-        //this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
-
-        // draws trees
-        let tree_transform = Mat4.identity()
-            .times(Mat4.translation(10, 0, 0));
-        this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
-        //tree_transform = Mat4.identity().times(Mat4.translation(4,0,0));
-        //this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
-
-        let i = 0;
-
-        // Creates a row of rocks on top side of floor
-        for (i = -20; i <= 20; i += 2) {
-            rock_transform = Mat4.identity();
-            rock_transform = rock_transform.times(Mat4.translation(i, 0, -20));
-            this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock)
+        // draws rocks from stored positions in constructor
+        for (const rock_position of this.rock_positions) {
+            let rock_transform = Mat4.identity().times(Mat4.translation(rock_position[0], rock_position[1], rock_position[2]));
+            this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
         }
-
-        // Creates a row of trees on right side of floor
-        for (i = -18; i <= 20; i += 2) {
-            tree_transform = Mat4.identity();
-            tree_transform = tree_transform.times(Mat4.translation(20, 0, i));
-            this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top)
+        // draws trees from stored positions in constructor
+        for (const tree_position of this.tree_positions) {
+            let tree_transform = Mat4.identity().times(Mat4.translation(tree_position[0], tree_position[1], tree_position[2]));
+            this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
         }
-
-
     }
 }
 
