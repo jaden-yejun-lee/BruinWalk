@@ -654,7 +654,7 @@ const Road = defs.Road =
                         .times(Mat4.translation(0,-0.99,0))
                         .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
                         .times(Mat4.scale(0.25, 3, 0.1))
-                        .times(Mat4.translation(0,-12,0)) // edit starting point of first dash
+                        .times(Mat4.translation(0, -12, 0)) // edit starting point of first dash
                 }
                 else {
                     // subsequent dashes
