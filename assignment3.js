@@ -7,11 +7,75 @@ const red = color(1, 0, 0, 1); // Red color, fully opaque
 const white = color(1, 1, 1, 1); // White color, fully opaque
 const grey = color(0.5, 0.5, 0.5, 1);
 
+const streets = [
+    { spawnPoint: vec3(-10, 0, -10), cooldown: 0 },
+    { spawnPoint: vec3(0, 0, -10), cooldown: 0 },
+    { spawnPoint: vec3(10, 0, -10), cooldown: 0 },
+    // ... other streets
+];
+const cooldownDuration = 1; // 1 second
+function getRandomVehicleType() {
+    const vehicleTypes = ['Car', 'Van', 'Starship'];
+    const randomIndex = Math.floor(Math.random() * vehicleTypes.length);
+    return vehicleTypes[randomIndex];
+}
+function updateSpawning(deltaTime) {
+    streets.forEach(street => {
+        // Decrease the cooldown timer
+        if (street.cooldown > 0) {
+            street.cooldown -= deltaTime;
+        }
+
+        // Check if it's time to spawn a new vehicle
+        if (street.cooldown <= 0) {
+            // Randomly decide whether to spawn a vehicle
+            if (Math.random() < 0.5) { // 50% chance to spawn a vehicle
+                spawnVehicleAtStreet(street);
+                street.cooldown = cooldownDuration; // Reset cooldown
+            }
+        }
+    });
+}
+
+function spawnVehicleAtStreet(street) {
+    const vehicleType = getRandomVehicleType();
+
+    // Define the vehicle's path 
+    const path = { start: street.spawnPoint, end: vec3(street.spawnPoint.x, street.spawnPoint.y, street.spawnPoint.z + 20), speed: 0.5 };
+
+    let vehicle;
+    switch (vehicleType) {
+        case 'Car':
+            vehicle = new defs.Car(car_materials, path, car_shapes, vec3(0, 1, 0));
+            break;
+        case 'Van':
+            vehicle = new defs.Van(van_materials, path, van_shapes, vec3(0, 1, 0));
+            break;
+        case 'Starship':
+            vehicle = new defs.Starship(starship_materials, path, starship_shapes, vec3(0, 1, 0));
+            break;
+        // Add cases for other vehicle types
+    }
+
+    this.vehicle_manager.add_vehicle(vehicle);
+}
+
 // Obtain random integer between min(inclusive) and max(inclusive)
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * ((max-min)+1) + min);
+}
+function getRandomDouble(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function getRandomColor() {
+    // Define an array of specified hex color values
+    const hexColors = ["#FF0000", "#008000", "#800080", "#0000FF", "#808080", "#FFFF00", "#FFA500"];
+    // Randomly select and return a hex color from the array
+    const randomIndex = Math.floor(Math.random() * hexColors.length);
+    return hexColors[randomIndex];
 }
 
 
@@ -108,8 +172,8 @@ export class Assignment3 extends Scene {
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
         };
 
-        const starship_path1 = { start: vec3(-4, 0, -10), end: vec3(-4, 0, 20), speed: 0.5 };
-        const starship_path2 = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.5 };
+        const starship_path1 = { start: vec3(-4, 0, -10), end: vec3(-4, 0, 20), speed: getRandomDouble(0.2, 0.8) };
+        const starship_path2 = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: getRandomDouble(0.2, 0.8)};
 
 
         const van_shapes = {
@@ -120,14 +184,15 @@ export class Assignment3 extends Scene {
 
         const van_materials = {
             body: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: grey }),
+            
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color(getRandomColor()) }),
             wheel: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
             window: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
         };
 
-        const van_path = { start: vec3(14, 0, 20), end: vec3(14, 0, -10), speed: 0.5 };
+        const van_path = { start: vec3(14, 0, 20), end: vec3(14, 0, -10), speed: getRandomDouble(0.3, 0.6) };
         const van_direction = vec3(0, -1, 0); // For van going right to left
 
         const car_shapes = {
@@ -140,7 +205,7 @@ export class Assignment3 extends Scene {
 
         const car_materials = {
             body: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFA500") }),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color(getRandomColor()) }),
             hood: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFD580") }),
             wheel: new Material(new defs.Phong_Shader(),
@@ -153,7 +218,7 @@ export class Assignment3 extends Scene {
             // Define other materials if needed
         };
 
-        const car_path = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.5 };
+        const car_path = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: getRandomDouble(0.7, 1.2) };
         const car_direction = vec3(0, -1, 0);
 
 
@@ -164,7 +229,9 @@ export class Assignment3 extends Scene {
         const van = new defs.Van(van_materials, van_path, van_shapes, van_direction);
         const car = new defs.Car(car_materials, car_path, car_shapes, car_direction);
 
-        this.vehicle_manager.add_vehicle(starship1);
+        //this.vehicle_manager.add_vehicle(starship1);
+        //this.vehicle_manager.add_vehicle(starship2);
+
         this.vehicle_manager.add_vehicle(van);
         this.vehicle_manager.add_vehicle(car);
         
@@ -251,8 +318,18 @@ export class Assignment3 extends Scene {
         //Drawing bear:
         let bear_mt = Mat4.identity();
         bear_mt = bear_mt.times(Mat4.translation(-20,2,0));
+        let bear_position = vec3(this.x_movement, 0, this.z_movement); // Calculate bear's position
+        this.shapes.bear_body.updatePosition(bear_position);
         this.draw_bear(context, program_state, bear_mt, t);
-        //this.vehicle_manager.update_and_draw(context, program_state);
+        
+        //check for collision
+        for (let vehicle of this.vehicle_manager.vehicles) {
+            if (typeof vehicle.checkCollision === 'function' && vehicle.checkCollision(this.shapes.bear_body)) {
+                // Handle collision (e.g., end game, reduce health, etc.)
+                throw new Error("Collision detected!");
+                console.log("Collision detected!");
+            }
+        }
 
         // draws rocks from stored positions in constructor
         for (const rock_position of this.rock_positions) {

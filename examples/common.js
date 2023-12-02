@@ -59,6 +59,8 @@ const Starship = defs.Starship =
             super(transform, materials, direction); // Assuming materials.starship is the material for the starship
             this.path = path; // Store the path for movement
             this.shapes = shapes; // Store the shapes for the starship
+            this.boundingSphere = { center: vec3(0, 0, 0), radius: 1.2 }; // Adjust radius as needed
+
         }
 
         update(t) {
@@ -78,6 +80,14 @@ const Starship = defs.Starship =
             // Update the transform for the starship with the new position and rotation.
             this.transform = Mat4.translation(...new_position)
                 .times(Mat4.rotation(corrected_angle, 0, 0, 1));
+
+            // Offset the center of the bounding sphere
+            this.boundingSphere.center = vec3(new_position[0] + 20, new_position[1], new_position[2]);
+
+        }
+        checkCollision(otherObject) {
+            const distance = this.boundingSphere.center.minus(otherObject.boundingSphere.center).norm();
+            return distance <= (this.boundingSphere.radius + otherObject.boundingSphere.radius);
         }
 
         draw(context, program_state) {
@@ -145,9 +155,14 @@ const Van = defs.Van =
             super(transform, materials, direction); // Assuming materials.van is the material for the van
             this.path = path; // Store the path for movement
             this.shapes = shapes; // Store the shapes for the van
+            this.boundingSphere = { center: vec3(0, 0, 0), radius: 1.5 }; // Adjust radius as needed
+
             // Define the rest of the van's specific shapes and transformations if needed
         }
-
+        checkCollision(otherObject) {
+            const distance = this.boundingSphere.center.minus(otherObject.boundingSphere.center).norm();
+            return distance <= (this.boundingSphere.radius + otherObject.boundingSphere.radius);
+        }
         update(t) {
             // Update van position based on the path and time
             const position_along_path = (t * this.path.speed) % 1;
@@ -161,15 +176,18 @@ const Van = defs.Van =
             // Update the transform for the van with the new position and rotation.
             this.transform = Mat4.translation(...new_position)
                 .times(Mat4.rotation(corrected_angle, 0, 0, 1));
+
+            this.boundingSphere.center = vec3(new_position[0] + 20, new_position[1], new_position[2]);
+
         }
 
         draw(context, program_state) {
             // Start with the current transform and apply additional transformations
             let model_transform = this.transform;
             model_transform = model_transform
-            .times(Mat4.rotation(Math.PI / 2, -1, 0, 0))
-            .times(Mat4.rotation(Math.PI / 2, 0, 0, 1))
-                
+                .times(Mat4.rotation(Math.PI / 2, -1, 0, 0))
+                .times(Mat4.rotation(Math.PI / 2, 0, 0, 1))
+
                 .times(Mat4.translation(0, 0, 2))
 
             if (this.direction[0] < 0) {
@@ -240,8 +258,13 @@ const Car = defs.Car =
             super(transform, materials, direction); // Assuming materials.car is the material for the car
             this.path = path; // Store the path for movement
             this.shapes = shapes; // Store the shapes for the car
-        }
+            this.boundingSphere = { center: vec3(0, 0, 0), radius: 1.5 }; // Adjust radius as needed
 
+        }
+        checkCollision(otherObject) {
+            const distance = this.boundingSphere.center.minus(otherObject.boundingSphere.center).norm();
+            return distance <= (this.boundingSphere.radius + otherObject.boundingSphere.radius);
+        }
         update(t) {
             // Update car position based on the path and time
             const position_along_path = (t * this.path.speed) % 1;
@@ -255,6 +278,9 @@ const Car = defs.Car =
             // Update the transform for the car with the new position and rotation.
             this.transform = Mat4.translation(...new_position)
                 .times(Mat4.rotation(corrected_angle, 0, 0, 1));
+
+                this.boundingSphere.center = vec3(new_position[0] + 20, new_position[1], new_position[2]);
+
         }
 
         draw(context, program_state) {
@@ -496,12 +522,12 @@ const Rock = defs.Rock =
             this.body = new Cube;
             this.topCube = new Cube;
         }
-        draw (context, program_state, model_transform, material) {
+        draw(context, program_state, model_transform, material) {
             let rock_transform = model_transform;
             this.body.draw(context, program_state, rock_transform, material);
             let rockTop_transform = rock_transform
-                .times(Mat4.scale(0.5,0.5,0.5))
-                .times(Mat4.translation(0,2,0));
+                .times(Mat4.scale(0.5, 0.5, 0.5))
+                .times(Mat4.translation(0, 2, 0));
             this.topCube.draw(context, program_state, rockTop_transform, material);
 
         }
@@ -536,9 +562,9 @@ const Floor = defs.Floor =
             super();
             this.body = new Cube;
         }
-        draw (context, program_state, model_transform, material) {
+        draw(context, program_state, model_transform, material) {
             let floor_transform = Mat4.identity()
-                .times(Mat4.translation(0,-1.1,0))      // minor edit so objects can be directly placed on top of floor
+                .times(Mat4.translation(0, -1.1, 0))      // minor edit so objects can be directly placed on top of floor
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates floor to be flat
                 .times(Mat4.scale(41, 31, 0.1))     // (**) flattened and scaled
             this.body.draw(context, program_state, floor_transform, material);
@@ -553,10 +579,10 @@ const Road = defs.Road =
             this.road = new Cube;
             this.dash = new Cube;
         }
-        draw (context, program_state, model_transform, road_material, dash_material) {
+        draw(context, program_state, model_transform, road_material, dash_material) {
             // draw road
             let road_transform = model_transform
-                .times(Mat4.translation(0,-1.0,0))      // minor edit so objects can be directly placed on top of road
+                .times(Mat4.translation(0, -1.0, 0))      // minor edit so objects can be directly placed on top of road
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates road to be flat
                 .times(Mat4.scale(3, 31, 0.1))
             this.road.draw(context, program_state, road_transform, road_material);
@@ -567,14 +593,14 @@ const Road = defs.Road =
             for (let i = 0; i < num_dashes; i++) {
                 if (i === 0) {
                     dash_transform = dash_transform
-                        .times(Mat4.translation(0,-0.99,0))      // minor edit so objects can be directly placed on top of road
+                        .times(Mat4.translation(0, -0.99, 0))      // minor edit so objects can be directly placed on top of road
                         .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates road to be flat
                         .times(Mat4.scale(0.25, 3, 0.1))
-                        .times(Mat4.translation(0,-8,0))
+                        .times(Mat4.translation(0, -8, 0))
                 }
                 else {
                     dash_transform = dash_transform
-                        .times(Mat4.translation(0,4,0));
+                        .times(Mat4.translation(0, 4, 0));
                 }
                 this.dash.draw(context, program_state, dash_transform, dash_material);
             }
@@ -690,6 +716,13 @@ const Bear_Body = defs.Bear_Body =
             tail = tail.times(Mat4.translation(0, -2.3, -0.85));
             tail = tail.times(Mat4.scale(0.3, 0.3, 0.3));
             Subdivision_Sphere.insert_transformed_copy_into(this, [4], tail);
+
+            this.boundingSphere = { center: vec3(0, 0, 0), radius: 2 }; // Adjust radius as needed
+
+        }
+        updatePosition(newPosition) {
+            console.log("newPosition: " + newPosition)
+            this.boundingSphere.center = newPosition;
         }
     }
 
@@ -750,6 +783,7 @@ const Bear_Limbs2 = defs.Bear_Limbs2 =
             Subdivision_Sphere.insert_transformed_copy_into(this, [4], r_bear_leg);
         }
     }
+
 const Grid_Patch = defs.Grid_Patch =
     class Grid_Patch extends Shape {
         // A grid of rows and columns you can distort. A tesselation of triangles connects the
@@ -857,10 +891,10 @@ const Tree = defs.Tree =
     class Tree extends Shape {
         constructor() {
             super();
-            this.stump = new Cylindrical_Tube(20,20);
+            this.stump = new Cylindrical_Tube(20, 20);
             this.top = new Cube;
         }
-        draw (context, program_state, model_transform, stump_material, tree_top_material) {
+        draw(context, program_state, model_transform, stump_material, tree_top_material) {
             // stump transformations
             let stump_transform = model_transform
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotate cylinder to be vertical
@@ -869,7 +903,7 @@ const Tree = defs.Tree =
             this.stump.draw(context, program_state, stump_transform, stump_material);
             stump_transform = stump_transform
                 .times(Mat4.scale(1, 1, 0.5))   // revert stump rotations
-                .times(Mat4.rotation(Math.PI/2, -1, 0, 0))
+                .times(Mat4.rotation(Math.PI / 2, -1, 0, 0))
 
             let treeTop_transform = stump_transform
                 .times(Mat4.translation(0, 2, 0));  // first box starts at top of cylinder
