@@ -7,6 +7,12 @@ const red = color(1, 0, 0, 1); // Red color, fully opaque
 const white = color(1, 1, 1, 1); // White color, fully opaque
 const grey = color(0.5, 0.5, 0.5, 1);
 
+const streets = [
+    { spawnPoint: vec3(-10, 0, -10), cooldown: 0 },
+    { spawnPoint: vec3(0, 0, -10), cooldown: 0 },
+    { spawnPoint: vec3(10, 0, -10), cooldown: 0 },
+    // ... other streets
+];
 const cooldownDuration = 1; // 1 second
 function getRandomVehicleType() {
     const vehicleTypes = ['Car', 'Van', 'Starship'];
@@ -230,7 +236,7 @@ export class Assignment3 extends Scene {
             // Define other materials if needed
         };
 
-        const car_path = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: getRandomDouble(0.2, .6) };
+        const car_path = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.5 };
         const car_direction = vec3(0, -1, 0);
         
 
