@@ -14,6 +14,17 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * ((max-min)+1) + min);
 }
 
+// input road translations in road
+function overlapWithRoad(i, ... road_positions) {
+    // return true if road overlaps
+    for (const road of road_positions) {
+        if (i < road + 3 && i > road - 3) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 export class Assignment3 extends Scene {
     constructor() {
@@ -27,6 +38,7 @@ export class Assignment3 extends Scene {
             floor: new defs.Floor(),
             sky: new defs.Sky(),
             road: new defs.Road(),
+            finishLine: new defs.Finish_Line(),
             bear_body: new defs.Bear_Body(),
             bear_face: new defs.Bear_Face(),
             bear_limbs1: new defs.Bear_Limbs1(),
@@ -54,6 +66,8 @@ export class Assignment3 extends Scene {
                 {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#777B7E")}),
             road_dash: new Material(new defs.Phong_Shader(),
                 {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#FFFF00")}),
+            finishLine: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#000000")}),
             bear: new Material(new defs.Phong_Shader(),
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
         }
@@ -65,25 +79,29 @@ export class Assignment3 extends Scene {
 
         this.rock_positions = [];
         this.tree_positions = [];
+        // array for road positions
+        this.road_positions = [-40, -18, -12, 12, 18, 40];
 
-        // 40 x 30 field
-        let field_length = 40;    // horizontal length of field
-        let field_width = 30;     // vertical width of field
+        // 60 x 40 field
+        let field_length = 60;    // horizontal length of field
+        let field_width = 40;     // vertical width of field
 
         let i = 0;
         let j = 0;
 
         // randomly populate field with rocks and trees
         // if randomInt = 1 -> rock, 2 -> tree, rest -> blank square
-        for (i = -field_length + 4; i <= field_length - 4; i += 2) {    // give bear 2 columns of space with no blocks at start and end
-            for (j = -field_width; j <= field_width; j += 2) {
-                let randomInt = getRandomInt(1,30);      // gets random int between 1 and 30 (increase range to make field less dense)
-                 console.log(randomInt)
-                if (randomInt === 1) {
-                    this.rock_positions.push(vec3(i,0,j));      // stores position in rock_positions array
-                }
-                else if (randomInt === 2) {
-                    this.tree_positions.push(vec3(i,0,j));      // stores position in tree_positions array
+        for (i = -field_length + 4; i <= field_length - 6; i += 2) {    // give bear 2 columns of space with no blocks at start and 3 columns of space at end for finish line
+            if (!overlapWithRoad(i, -40, -18, -12, 12, 18, 40)) {
+                for (j = -field_width; j <= field_width; j += 2) {
+                    let randomInt = getRandomInt(1,30);      // gets random int between 1 and 30 (increase range to make field less dense)
+                    console.log(randomInt)
+                    if (randomInt === 1) {
+                        this.rock_positions.push(vec3(i,0,j));      // stores position in rock_positions array
+                    }
+                    else if (randomInt === 2) {
+                        this.tree_positions.push(vec3(i,0,j));      // stores position in tree_positions array
+                    }
                 }
             }
         }
@@ -233,20 +251,23 @@ export class Assignment3 extends Scene {
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
         this.vehicle_manager.update_and_draw(context, program_state);
 
+        // draws sky
+        this.shapes.sky.draw(context, program_state, Mat4.identity(), this.materials.sky);
+
         // draws floor
         this.shapes.floor.draw(context, program_state, Mat4.identity(), this.materials.floor);
 
-        // draws road
-        let road_transform= Mat4.identity();
-        road_transform = road_transform.times(Mat4.translation(-4,0,0)); // translates road to designated position on field
-        this.shapes.road.draw(context, program_state, road_transform, this.materials.road, this.materials.road_dash);
+        // draws roads
+        for (const road_position of this.road_positions) {
+            let road_transform = Mat4.identity().times(Mat4.translation(road_position, 0, 0));
+            this.shapes.road.draw(context, program_state, road_transform, this.materials.road, this.materials.road_dash);
+        }
 
-        // second road
-        road_transform = road_transform.times(Mat4.translation(8,0,0)); // translates road to designated position on field
-        this.shapes.road.draw(context, program_state, road_transform, this.materials.road, this.materials.road_dash);
+        // draws Finish Line
+        let finishLine_transform = Mat4.identity()
+            .times(Mat4.translation(58,0,0));  // field_length - 2
+        this.shapes.finishLine.draw(context, program_state, finishLine_transform, this.materials.finishLine);
 
-        // draws sky
-        this.shapes.sky.draw(context, program_state, Mat4.identity(), this.materials.sky);
 
         //Drawing bear:
         let bear_mt = Mat4.identity();
