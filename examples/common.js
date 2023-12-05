@@ -3,7 +3,7 @@ import { widgets } from '../tiny-graphics-widgets.js';
 // Pull these names into this module's scope for convenience:
 const {
     Vector, Vector3, vec, vec3, vec4, color, Matrix, Mat4,
-    Light, Shape, Material, Shader, Texture, Scene, hex_color
+    Light, Shape, Material, Shader, Texture, Scene
 } = tiny;
 
 Object.assign(tiny, widgets);
@@ -566,68 +566,11 @@ const Floor = defs.Floor =
             let floor_transform = Mat4.identity()
                 .times(Mat4.translation(0, -1.1, 0))      // minor edit so objects can be directly placed on top of floor
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates floor to be flat
-                .times(Mat4.scale(61, 41, 0.1))     // (**) flattened and scaled (60 x 40)
+                .times(Mat4.scale(41, 31, 0.1))     // (**) flattened and scaled
             this.body.draw(context, program_state, floor_transform, material);
         }
 
     }
-
-
-const Finish_Line = defs.Finish_Line =
-    class Finish_Line extends Cube {
-        constructor() {
-            super();
-            this.body = new Cube;
-        }
-        draw(context, program_state, model_transform, material) {
-
-            let finish_transform = model_transform
-                .times(Mat4.translation(0,-1,0))      // minor edit so objects can be directly placed on top of floor
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates floor to be flat
-                .times(Mat4.scale(3, 41, 0.1))
-
-            // left is -2, middle is 0, right is 2
-            for (let row = -2; row <= 2; row += 2) {
-                for (let col = -40; col <= 40; col += 2) {
-                    let square_transform = model_transform
-                        .times(Mat4.translation(row, 0, col))
-                        .times(Mat4.translation(0,-1,0))
-                        .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
-                        .times(Mat4.scale(1,1,0.1))
-
-                    // Alternate between two colors for the checkered pattern
-                    if ((row + col) % 4 === 0) {
-                        material.color = hex_color("#000000"); // Black
-                    } else {
-                        material.color = hex_color("#FFFFFF"); // White
-                    }
-                    this.body.draw(context, program_state, square_transform, material);
-                }
-            }
-
-
-
-            //this.body.draw(context, program_state, finish_transform, material);
-
-            /* for (let i = -10; i <= 10; i += square_size) {
-                for (let j = -1; j <= 1; j += square_size) {
-                    square_transform = square_transform
-                        .times(Mat4.translation(i, j, 0))
-                        .times(Mat4.scale(square_size / 2, square_size / 2, 0.1));
-
-                    // Alternate between black and white squares
-                    if ((i / square_size) % 2 === 0) {
-                        material.color = hex_color("#000000"); // Black
-                    } else {
-                        material.color = hex_color("#FFFFFF"); // White
-                    }
-
-                    this.body.draw(context, program_state, square_transform, material);
-                }
-            } */
-        }
-    }
-
 
 const Road = defs.Road =
     class Road extends Cube {
@@ -641,23 +584,21 @@ const Road = defs.Road =
             let road_transform = model_transform
                 .times(Mat4.translation(0, -1.0, 0))      // minor edit so objects can be directly placed on top of road
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates road to be flat
-                .times(Mat4.scale(3, 41, 0.1))
+                .times(Mat4.scale(3, 31, 0.1))
             this.road.draw(context, program_state, road_transform, road_material);
 
             // draw dashes
-            let num_dashes = 7;
+            let num_dashes = 5;
             let dash_transform = model_transform;
             for (let i = 0; i < num_dashes; i++) {
-                // first dash
                 if (i === 0) {
                     dash_transform = dash_transform
-                        .times(Mat4.translation(0,-0.99,0))
-                        .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
+                        .times(Mat4.translation(0, -0.99, 0))      // minor edit so objects can be directly placed on top of road
+                        .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates road to be flat
                         .times(Mat4.scale(0.25, 3, 0.1))
-                        .times(Mat4.translation(0, -12, 0)) // edit starting point of first dash
+                        .times(Mat4.translation(0, -8, 0))
                 }
                 else {
-                    // subsequent dashes
                     dash_transform = dash_transform
                         .times(Mat4.translation(0, 4, 0));
                 }
@@ -665,7 +606,6 @@ const Road = defs.Road =
             }
         }
     }
-
 
 const Subdivision_Sphere = defs.Subdivision_Sphere =
     class Subdivision_Sphere extends Shape {
