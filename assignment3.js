@@ -176,7 +176,7 @@ export class Assignment3 extends Scene {
                 directions: [-1, 1, -1, 1]
             }
         ]
-        const starship_path1 =  { start: vec3(12, 0, -70), end: vec3(12, 0, 70), speed: 0.5 };
+        const starship_path1 = { start: vec3(12, 0, -70), end: vec3(12, 0, 70), speed: 0.5 };
         const starship_path2 = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.4 };
         const car_path = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.5 };
         const van_path = { start: vec3(14, 0, 20), end: vec3(14, 0, -10), speed: getRandomDouble(0.3, 0.6) };
@@ -188,7 +188,7 @@ export class Assignment3 extends Scene {
         let i = 0;
         let j = 0;
 
-       
+
 
 
 
@@ -248,6 +248,33 @@ export class Assignment3 extends Scene {
             window: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
         };
+        this.redvan_materials = {
+            body: new Material(new defs.Phong_Shader(),
+
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("FF0000") }),
+            wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            window: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+        };
+        this.greenvan_materials = {
+            body: new Material(new defs.Phong_Shader(),
+
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("00FF00") }),
+            wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            window: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+        };
+        this.bluevan_materials = {
+            body: new Material(new defs.Phong_Shader(),
+
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("0000FF") }),
+            wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            window: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+        };
 
         const van_direction = vec3(0, -1, 0); // For van going right to left
 
@@ -259,9 +286,37 @@ export class Assignment3 extends Scene {
             window: new defs.Cube()
         };
 
-        this.car_materials = {
+        this.redcar_materials = {
             body: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color(getRandomColor()) }),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("FF0000") }),
+            hood: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFD580") }),
+            wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            driverArea: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#F0F0F0") }),
+            window: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+
+            // Define other materials if needed
+        };
+        this.greencar_materials = {
+            body: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("00FF00") }),
+            hood: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFD580") }),
+            wheel: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+            driverArea: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#F0F0F0") }),
+            window: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
+
+            // Define other materials if needed
+        };
+        this.bluecar_materials = {
+            body: new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("0000FF") }),
             hood: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFD580") }),
             wheel: new Material(new defs.Phong_Shader(),
@@ -412,23 +467,23 @@ export class Assignment3 extends Scene {
 
         const currentTime = program_state.animation_time / 1000; // Convert milliseconds to seconds
 
-        if ((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime12 >= 4) {
+        if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime12 >= 4) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2)) {
             let st = 12
             let startVar;
             let endVar;
             let startVar2;
             let endVar2;
-            if(Math.random()<0.5){
+            if (Math.random() < 0.5) {
                 startVar = vec3(st, 0, -70);
                 endVar = vec3(st, 0, 70);
-                startVar2 = vec3(-1*st, 0, 70);
-                endVar2 = vec3(-1*st, 0, -70);
+                startVar2 = vec3(-1 * st, 0, 70);
+                endVar2 = vec3(-1 * st, 0, -70);
             }
-            else{
+            else {
                 startVar = vec3(st, 0, 70);
                 endVar = vec3(st, 0, -70);
-                startVar2 = vec3(-1*st, 0, -70);
-                endVar2 = vec3(-1*st, 0, 70);
+                startVar2 = vec3(-1 * st, 0, -70);
+                endVar2 = vec3(-1 * st, 0, 70);
             }
             const path = { start: startVar, end: endVar, speed: 0.5 };
             const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
@@ -436,12 +491,30 @@ export class Assignment3 extends Scene {
             const type2 = getRandomVehicleType()
 
             let vehicle;
+            let randomNum = getRandomInt(1, 3)
+
             switch (type) {
                 case 'Car':
-                    vehicle = new defs.Car(this.car_materials, path, this.car_shapes, currentTime);
+                    if (randomNum == 1) {
+                        vehicle = new defs.Car(this.redcar_materials, path, this.car_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle = new defs.Car(this.greencar_materials, path, this.car_shapes, currentTime);
+                    }
+                    else {
+                        vehicle = new defs.Car(this.bluecar_materials, path, this.car_shapes, currentTime);
+                    }
                     break;
                 case 'Van':
-                    vehicle = new defs.Van(this.van_materials, path, this.van_shapes, currentTime);
+                    if (randomNum == 1) {
+                        vehicle = new defs.Van(this.redvan_materials, path, this.van_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle = new defs.Van(this.greenvan_materials, path, this.van_shapes, currentTime);
+                    }
+                    else {
+                        vehicle = new defs.Van(this.bluevan_materials, path, this.van_shapes, currentTime);
+                    }
                     break;
                 case 'Starship':
                     vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
@@ -452,10 +525,25 @@ export class Assignment3 extends Scene {
             let vehicle2;
             switch (type2) {
                 case 'Car':
-                    vehicle2 = new defs.Car(this.car_materials, path2, this.car_shapes, currentTime);
-                    break;
+                    if (randomNum == 1) {
+                        vehicle2 = new defs.Car(this.redcar_materials, path2, this.car_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle2 = new defs.Car(this.greencar_materials, path2, this.car_shapes, currentTime);
+                    }
+                    else {
+                        vehicle2 = new defs.Car(this.bluecar_materials, path2, this.car_shapes, currentTime);
+                    } break;
                 case 'Van':
-                    vehicle2 = new defs.Van(this.van_materials, path2, this.van_shapes, currentTime);
+                    if (randomNum == 1) {
+                        vehicle2 = new defs.Van(this.redvan_materials, path2, this.van_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle2 = new defs.Van(this.greenvan_materials, path2, this.van_shapes, currentTime);
+                    }
+                    else {
+                        vehicle2 = new defs.Van(this.bluevan_materials, path2, this.van_shapes, currentTime);
+                    }
                     break;
                 case 'Starship':
                     vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
@@ -468,37 +556,52 @@ export class Assignment3 extends Scene {
 
         }
 
-        if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime18 >= 4) || ((currentTime > 0.5 && currentTime<0.51) || (currentTime > 1.5 && currentTime<1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2))) {
+        if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime18 >= 4) || ((currentTime > 0.5 && currentTime < 0.51) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2))) {
             console.log("wrip")
             let st = 18
             let startVar;
             let endVar;
             let startVar2;
             let endVar2;
-            if(Math.random()<0.5){
+            if (Math.random() < 0.5) {
                 startVar = vec3(st, 0, -70);
                 endVar = vec3(st, 0, 70);
-                startVar2 = vec3(-1*st, 0, 70);
-                endVar2 = vec3(-1*st, 0, -70);
+                startVar2 = vec3(-1 * st, 0, 70);
+                endVar2 = vec3(-1 * st, 0, -70);
             }
-            else{
+            else {
                 startVar = vec3(st, 0, 70);
                 endVar = vec3(st, 0, -70);
-                startVar2 = vec3(-1*st, 0, -70);
-                endVar2 = vec3(-1*st, 0, 70);
+                startVar2 = vec3(-1 * st, 0, -70);
+                endVar2 = vec3(-1 * st, 0, 70);
             }
             const path = { start: startVar, end: endVar, speed: 0.5 };
             const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
             const type = getRandomVehicleType()
             const type2 = getRandomVehicleType()
-
+            let randomNum = getRandomInt(1, 3)
             let vehicle;
             switch (type) {
                 case 'Car':
-                    vehicle = new defs.Car(this.car_materials, path, this.car_shapes, currentTime);
-                    break;
+                    if (randomNum == 1) {
+                        vehicle = new defs.Car(this.redcar_materials, path, this.car_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle = new defs.Car(this.greencar_materials, path, this.car_shapes, currentTime);
+                    }
+                    else {
+                        vehicle = new defs.Car(this.bluecar_materials, path, this.car_shapes, currentTime);
+                    } break;
                 case 'Van':
-                    vehicle = new defs.Van(this.van_materials, path, this.van_shapes, currentTime);
+                    if (randomNum == 1) {
+                        vehicle = new defs.Van(this.redvan_materials, path, this.van_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle = new defs.Van(this.greenvan_materials, path, this.van_shapes, currentTime);
+                    }
+                    else {
+                        vehicle = new defs.Van(this.bluevan_materials, path, this.van_shapes, currentTime);
+                    }
                     break;
                 case 'Starship':
                     vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
@@ -509,10 +612,25 @@ export class Assignment3 extends Scene {
             let vehicle2;
             switch (type2) {
                 case 'Car':
-                    vehicle2 = new defs.Car(this.car_materials, path2, this.car_shapes, currentTime);
-                    break;
+                    if (randomNum == 1) {
+                        vehicle2 = new defs.Car(this.redcar_materials, path2, this.car_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle2 = new defs.Car(this.greencar_materials, path2, this.car_shapes, currentTime);
+                    }
+                    else {
+                        vehicle2 = new defs.Car(this.bluecar_materials, path2, this.car_shapes, currentTime);
+                    } break;
                 case 'Van':
-                    vehicle2 = new defs.Van(this.van_materials, path2, this.van_shapes, currentTime);
+                    if (randomNum == 1) {
+                        vehicle2 = new defs.Van(this.redvan_materials, path2, this.van_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle2 = new defs.Van(this.greenvan_materials, path2, this.van_shapes, currentTime);
+                    }
+                    else {
+                        vehicle2 = new defs.Van(this.bluevan_materials, path2, this.van_shapes, currentTime);
+                    }
                     break;
                 case 'Starship':
                     vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
@@ -525,23 +643,23 @@ export class Assignment3 extends Scene {
 
         }
 
-        if ((currentTime > 0.5 && currentTime<0.51) || (currentTime > 1.5 && currentTime<1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2)) {
+        if ((currentTime > 0.5 && currentTime < 0.51) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2)) {
             let st = 40
             let startVar;
             let endVar;
             let startVar2;
             let endVar2;
-            if(Math.random()<0.5){
+            if (Math.random() < 0.5) {
                 startVar = vec3(st, 0, -60);
                 endVar = vec3(st, 0, 60);
-                startVar2 = vec3(-1*st, 0, 60);
-                endVar2 = vec3(-1*st, 0, -60);
+                startVar2 = vec3(-1 * st, 0, 60);
+                endVar2 = vec3(-1 * st, 0, -60);
             }
-            else{
+            else {
                 startVar = vec3(st, 0, 60);
                 endVar = vec3(st, 0, -60);
-                startVar2 = vec3(-1*st, 0, -60);
-                endVar2 = vec3(-1*st, 0, 60);
+                startVar2 = vec3(-1 * st, 0, -60);
+                endVar2 = vec3(-1 * st, 0, 60);
             }
             const path = { start: startVar, end: endVar, speed: 0.5 };
             const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
@@ -549,12 +667,28 @@ export class Assignment3 extends Scene {
             const type2 = getRandomVehicleType()
 
             let vehicle;
+            let randomNum = getRandomInt(1, 3)
             switch (type) {
                 case 'Car':
-                    vehicle = new defs.Car(this.car_materials, path, this.car_shapes, currentTime);
-                    break;
+                    if (randomNum == 1) {
+                        vehicle = new defs.Car(this.redcar_materials, path, this.car_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle = new defs.Car(this.greencar_materials, path, this.car_shapes, currentTime);
+                    }
+                    else {
+                        vehicle = new defs.Car(this.bluecar_materials, path, this.car_shapes, currentTime);
+                    } break;
                 case 'Van':
-                    vehicle = new defs.Van(this.van_materials, path, this.van_shapes, currentTime);
+                    if (randomNum == 1) {
+                        vehicle = new defs.Van(this.redvan_materials, path, this.van_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle = new defs.Van(this.greenvan_materials, path, this.van_shapes, currentTime);
+                    }
+                    else {
+                        vehicle = new defs.Van(this.bluevan_materials, path, this.van_shapes, currentTime);
+                    }
                     break;
                 case 'Starship':
                     vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
@@ -565,10 +699,25 @@ export class Assignment3 extends Scene {
             let vehicle2;
             switch (type2) {
                 case 'Car':
-                    vehicle2 = new defs.Car(this.car_materials, path2, this.car_shapes, currentTime);
-                    break;
+                    if (randomNum == 1) {
+                        vehicle2 = new defs.Car(this.redcar_materials, path2, this.car_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle2 = new defs.Car(this.greencar_materials, path2, this.car_shapes, currentTime);
+                    }
+                    else {
+                        vehicle2 = new defs.Car(this.bluecar_materials, path2, this.car_shapes, currentTime);
+                    } break;
                 case 'Van':
-                    vehicle2 = new defs.Van(this.van_materials, path2, this.van_shapes, currentTime);
+                    if (randomNum == 1) {
+                        vehicle2 = new defs.Van(this.redvan_materials, path2, this.van_shapes, currentTime);
+                    }
+                    else if (randomNum == 2) {
+                        vehicle2 = new defs.Van(this.greenvan_materials, path2, this.van_shapes, currentTime);
+                    }
+                    else {
+                        vehicle2 = new defs.Van(this.bluevan_materials, path2, this.van_shapes, currentTime);
+                    }
                     break;
                 case 'Starship':
                     vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
@@ -580,9 +729,9 @@ export class Assignment3 extends Scene {
             this.lastSpawnTime40 = currentTime; // Update last spawn time
 
         }
-        
 
-        
+
+
 
 
 
