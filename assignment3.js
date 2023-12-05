@@ -85,8 +85,8 @@ export class Assignment3 extends Scene {
         this.direction = 1;
         this.x_movement = 0; //x movement is bound by 0 to 2*x-width of screen
         this.z_movement = 0; //z movement is bound by -z-width to +z-width of screen
-        this.start_animation = 0;
-
+        this.start_animation = 0; //Flag for when to show start screen, when to pan to game
+        this.end_animation = 0;
         this.rock_positions = [];
         this.tree_positions = [];
         // array for road positions
@@ -215,68 +215,75 @@ export class Assignment3 extends Scene {
         this.key_triggered_button("Play Game", ["p"], () => {this.start_animation++;});
         this.key_triggered_button("Up", ['ArrowUp'], () => {
             if (this.z_movement > -40) {this.z_movement = this.z_movement - 1;}
-            this.direction = 2;
-            this.run = 1;
-        });
+            this.direction = 2;});
         this.key_triggered_button("Down", ['ArrowDown'], () => {
             if (this.z_movement < 40) {this.z_movement = this.z_movement + 1;}
-            this.direction = 0;
-            this.run = 1;});
+            this.direction = 0;});
         this.key_triggered_button("Left", ['ArrowLeft'], () => {
             if (this.x_movement > 0) {this.x_movement = this.x_movement - 1;}
-            this.direction = 3;
-            this.run = 1;});
+            this.direction = 3;});
         this.key_triggered_button("Right", ['ArrowRight'], () => {
             if (this.x_movement < 120) {this.x_movement = this.x_movement + 1;}
-            this.direction = 1;
-            this.run = 1;});
+            this.direction = 1;});
     }
     displayStartText(context, program_state) {
-        const identity_mat = Mat4.identity();
-        let strings2 = ["BruinWalk", "Press 'P' to Start"]
-        let cube_side = Mat4.identity().times(Mat4.translation(-22,20,-10));
+        let strings = ["BruinWalk", "Press 'P' to Start"]
+        let text_location = Mat4.identity().times(Mat4.translation(-11,20,-10));
         program_state.set_camera(this.initial_camera_location);
-        for (let line of strings2) {
+        for (let line of strings) {
             this.shapes.text.set_string(line, context.context);
-            this.shapes.text.draw(context, program_state, identity_mat.times(cube_side).times(Mat4.scale(1.7,1.7,1.7)), this.text_image);
-            cube_side.post_multiply(Mat4.translation(0, -5, 0));
+            this.shapes.text.draw(context, program_state, text_location.times(Mat4.scale(1.7,1.7,1.7)), this.text_image);
+            text_location.post_multiply(Mat4.translation(-10, -5, 0));
         }
     }
 
-    pan_over(context, program_state) {
+    pan_over(program_state) {
         const pause_duration = 1;  // Pause duration in seconds
         const animation_duration = 6;  // Duration of the camera pan
         const total_duration = pause_duration + animation_duration;  // Total duration including pause
-
         const t = program_state.animation_time / 1000; // Current time in seconds
         const t_normalized = Math.min(t / total_duration, 1); // Ensure t_normalized is in [0, 1]
         if (t < pause_duration)
             return;
-        // Use linear interpolation (lerp) to smoothly transition between start and end positions
         const interpolated_position = vec3(t_normalized * (-60), 15, 40);
-        // Update the camera location
         const new_camera_location = Mat4.look_at(interpolated_position, vec3(t_normalized*(-60), 0, -80), vec3(0, 1, 0));
         program_state.set_camera(new_camera_location);
         if (t_normalized == 1)
             this.start_animation++;
     }
+
+    displayEndText(context, program_state, win) {
+        let text_location = Mat4.identity().times(Mat4.translation(-68 + this.x_movement,20,-10));
+        let percent_completed = (this.x_movement/120)*100;
+        percent_completed = percent_completed.toFixed(0);
+        let game_over_text = "You lost!";
+        if (win) {game_over_text = "You won!";
+        percent_completed = 100;}
+        this.shapes.text.set_string(game_over_text, context.context);
+        this.shapes.text.draw(context, program_state, text_location.times(Mat4.scale(1.7,1.7,1.7)), this.text_image);
+        text_location.post_multiply(Mat4.translation(-17, -5, 0));
+        let completion_msg = `You crossed ${percent_completed}% of the field`
+        this.shapes.text.set_string(completion_msg, context.context);
+        this.shapes.text.draw(context, program_state, text_location.times(Mat4.scale(1.3,1.3,1.3)), this.text_image);
+        }
+
+
     display(context, program_state) {
         program_state.lights = [new Light(vec4(3, 2, 1, 0), color(1, 1, 1, 1), 1000000),
             new Light(vec4(3, 10, 10, 1), color(1, .7, .7, 1), 100000)];
-        if (!context.scratchpad.controls) {
-            program_state.set_camera(this.initial_camera_location);
-        }
+
         const t = program_state.animation_time / 1000; // Current time in seconds
 
-
+        if (this.x_movement > 117) //If finish line is reached, play end animation
+            this.end_animation = 1;
         //Update where camera is looking to follow the bear:
-        if(this.start_animation == 0) {
+        if(this.start_animation == 0)
            this.displayStartText(context, program_state);
-        }
-        else if(this.start_animation == 1) {
-            this.pan_over(context, program_state);
-        }
+        else if(this.start_animation == 1)
+            this.pan_over(program_state);
         else {
+            if (this.end_animation == 1)
+                this.displayEndText(context, program_state, true);
             let cam_z = this.z_movement
             if (cam_z > 32)
                 cam_z = 32;
@@ -285,11 +292,8 @@ export class Assignment3 extends Scene {
         }
 
 
-
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
-
-        let model_transform = Mat4.identity();
 
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
