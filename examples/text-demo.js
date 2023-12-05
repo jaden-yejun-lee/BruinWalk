@@ -74,14 +74,23 @@ export class Text_Demo extends Scene {             // **Text_Demo** is a scene w
 
         const t = program_state.animation_time / 1000;
         const funny_orbit = Mat4.rotation(Math.PI / 4 * t, Math.cos(t), Math.sin(t), .7 * Math.cos(t));
-        this.shapes.cube.draw(context, program_state, funny_orbit, this.grey);
+        const identity_mat = Mat4.identity();
+        this.shapes.cube.draw(context, program_state, identity_mat, this.grey);
 
 
         let strings = ["This is some text", "More text", "1234567890", "This is a line.\n\n\n" + "This is another line.",
             Text_Line.toString(), Text_Line.toString()];
 
+        let strings2 = ["BruinWalk", "Press 'P' to Start"]
+        let cube_side = Mat4.identity().times(Mat4.translation(-.9,.9,1.01));
+
+        for (let line of strings2) {
+            this.shapes.text.set_string(line, context.context);
+            this.shapes.text.draw(context, program_state, identity_mat.times(cube_side).times(Mat4.scale(0.03,0.03,0.03)), this.text_image);
+            cube_side.post_multiply(Mat4.translation(0, -.06, 0));
+        }
         // Sample the "strings" array and draw them onto a cube.
-        for (let i = 0; i < 3; i++)
+       /* for (let i = 0; i < 3; i++)
             for (let j = 0; j < 2; j++) {             // Find the matrix for a basis located along one of the cube's sides:
                 let cube_side = Mat4.rotation(i == 0 ? Math.PI / 2 : 0, 1, 0, 0)
                     .times(Mat4.rotation(Math.PI * j - (i == 1 ? Math.PI / 2 : 0), 0, 1, 0))
@@ -91,11 +100,11 @@ export class Text_Demo extends Scene {             // **Text_Demo** is a scene w
                 // Draw a Text_String for every line in our string, up to 30 lines:
                 for (let line of multi_line_string.slice(0, 30)) {             // Assign the string to Text_String, and then draw it.
                     this.shapes.text.set_string(line, context.context);
-                    this.shapes.text.draw(context, program_state, funny_orbit.times(cube_side)
+                    this.shapes.text.draw(context, program_state, identity_mat.times(cube_side)
                         .times(Mat4.scale(.03, .03, .03)), this.text_image);
                     // Move our basis down a line.
                     cube_side.post_multiply(Mat4.translation(0, -.06, 0));
                 }
-            }
+            }*/
     }
 }
