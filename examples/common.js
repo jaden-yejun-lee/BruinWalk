@@ -45,6 +45,7 @@ export class VehicleManager {
 
     // Update the position of all vehicles and draw them
     update_and_draw(context, program_state) {
+        this.vehicles = this.vehicles.filter(vehicle => !vehicle.shouldRemove); // Remove vehicles marked for removal
         for (let vehicle of this.vehicles) {
             vehicle.update(program_state.animation_time / 1000);
             vehicle.draw(context, program_state);
@@ -54,19 +55,26 @@ export class VehicleManager {
 
 const Starship = defs.Starship =
     class Starship extends Vehicle {
-        constructor(materials, path, shapes, direction) {
+        constructor(materials, path, shapes, direction, ct=0, releaseTime=0) {
             const transform = Mat4.identity(); // Start with an identity transform for the starship
             super(transform, materials, direction); // Assuming materials.starship is the material for the starship
             this.path = path; // Store the path for movement
             this.shapes = shapes; // Store the shapes for the starship
             this.boundingSphere = { center: vec3(0, 0, 0), radius: 1.2 }; // Adjust radius as needed
+            this.creationTime = ct;
+            this.releaseTime = releaseTime
 
         }
 
-        update(t) {
+        update(currT) {
+            if (currT < this.releaseTime) {
+                return;
+            }
+            let t = currT - this.creationTime
+            
             // Here, you'll provide the specific logic for updating the starship's position and orientation
+            
             const position_along_path = (t * this.path.speed) % 1;
-            console.log("speed", this.path.speed)
             // Interpolate between the start and end points based on the position along the path.
             const new_position = this.path.start.mix(this.path.end, position_along_path);
 
@@ -83,6 +91,13 @@ const Starship = defs.Starship =
 
             // Offset the center of the bounding sphere
             this.boundingSphere.center = vec3(new_position[0] + 20, new_position[1], new_position[2]);
+
+
+            if (Math.abs(this.transform[0][3] - this.path.end[0]) < 10 &&
+            Math.abs(this.transform[1][3] - this.path.end[1]) < 10 &&
+            Math.abs(this.transform[2][3] - this.path.end[2]) < 10) {
+            this.shouldRemove = true; // Set flag for removal
+        }
 
         }
         checkCollision(otherObject) {
@@ -103,7 +118,6 @@ const Starship = defs.Starship =
             }
 
             let body_transform = model_transform.times(Mat4.scale(1.5, 1.5, 1));
-            console.log(this.materials)
             this.shapes.body.draw(context, program_state, body_transform, this.materials.body);
 
             // Pole
@@ -150,12 +164,13 @@ const Starship = defs.Starship =
 
 const Van = defs.Van =
     class Van extends Vehicle {
-        constructor(materials, path, shapes, direction) {
+        constructor(materials, path, shapes, direction, ct=0) {
             const transform = Mat4.identity(); // Start with an identity transform for the van
             super(transform, materials, direction); // Assuming materials.van is the material for the van
             this.path = path; // Store the path for movement
             this.shapes = shapes; // Store the shapes for the van
             this.boundingSphere = { center: vec3(0, 0, 0), radius: 1.5 }; // Adjust radius as needed
+            this.creationTime = ct;
 
             // Define the rest of the van's specific shapes and transformations if needed
         }
@@ -163,11 +178,12 @@ const Van = defs.Van =
             const distance = this.boundingSphere.center.minus(otherObject.boundingSphere.center).norm();
             return distance <= (this.boundingSphere.radius + otherObject.boundingSphere.radius);
         }
-        update(t) {
+        update(currT) {
+            let t = currT - this.creationTime
+
             // Update van position based on the path and time
             const position_along_path = (t * this.path.speed) % 1;
             const new_position = this.path.start.mix(this.path.end, position_along_path);
-
             // Calculate the orientation of the van based on the direction of travel.
             const forward_vector = this.path.end.minus(this.path.start).normalized();
             const angle = Math.atan2(forward_vector[1], forward_vector[0]);
@@ -178,6 +194,12 @@ const Van = defs.Van =
                 .times(Mat4.rotation(corrected_angle, 0, 0, 1));
 
             this.boundingSphere.center = vec3(new_position[0] + 20, new_position[1], new_position[2]);
+
+            if (Math.abs(this.transform[0][3] - this.path.end[0]) < 10 &&
+            Math.abs(this.transform[1][3] - this.path.end[1]) < 10 &&
+            Math.abs(this.transform[2][3] - this.path.end[2]) < 10) {
+            this.shouldRemove = true; // Set flag for removal
+        }
 
         }
 
@@ -253,21 +275,24 @@ const Van = defs.Van =
 
 const Car = defs.Car =
     class Car extends Vehicle {
-        constructor(materials, path, shapes, direction) {
+        constructor(materials, path, shapes, direction, ct=0) {
             const transform = Mat4.identity(); // Start with an identity transform for the car
             super(transform, materials, direction); // Assuming materials.car is the material for the car
             this.path = path; // Store the path for movement
             this.shapes = shapes; // Store the shapes for the car
             this.boundingSphere = { center: vec3(0, 0, 0), radius: 1.5 }; // Adjust radius as needed
-
+            this.creationTime = ct;
         }
+
         checkCollision(otherObject) {
             const distance = this.boundingSphere.center.minus(otherObject.boundingSphere.center).norm();
             return distance <= (this.boundingSphere.radius + otherObject.boundingSphere.radius);
         }
-        update(t) {
+        update(currT) {
+            let t = currT - this.creationTime
             // Update car position based on the path and time
             const position_along_path = (t * this.path.speed) % 1;
+            console.log(position_along_path)
             const new_position = this.path.start.mix(this.path.end, position_along_path);
 
             // Calculate the orientation of the car based on the direction of travel.
@@ -280,6 +305,12 @@ const Car = defs.Car =
                 .times(Mat4.rotation(corrected_angle, 0, 0, 1));
 
                 this.boundingSphere.center = vec3(new_position[0] + 20, new_position[1], new_position[2]);
+            
+                if (Math.abs(this.transform[0][3] - this.path.end[0]) < 10 &&
+                Math.abs(this.transform[1][3] - this.path.end[1]) < 10 &&
+                Math.abs(this.transform[2][3] - this.path.end[2]) < 10) {
+                this.shouldRemove = true; // Set flag for removal
+            }
 
         }
 
@@ -781,7 +812,6 @@ const Bear_Body = defs.Bear_Body =
 
         }
         updatePosition(newPosition) {
-            console.log("newPosition: " + newPosition)
             this.boundingSphere.center = newPosition;
         }
     }

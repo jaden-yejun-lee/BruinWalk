@@ -64,7 +64,7 @@ function spawnVehicleAtStreet(street) {
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
-    return Math.floor(Math.random() * ((max-min)+1) + min);
+    return Math.floor(Math.random() * ((max - min) + 1) + min);
 }
 function getRandomDouble(min, max) {
     return Math.random() * (max - min) + min;
@@ -79,7 +79,7 @@ function getRandomColor() {
 }
 
 // input road translations in road
-function overlapWithRoad(i, ... road_positions) {
+function overlapWithRoad(i, ...road_positions) {
     // return true if road overlaps
     for (const road of road_positions) {
         if (i < road + 3 && i > road - 3) {
@@ -95,7 +95,6 @@ export class Assignment3 extends Scene {
         super();
 
         this.shapes = {
-            car: new defs.Car(),
             //starship: new defs.Starship(),
             rock: new defs.Rock(),
             tree: new defs.Tree(),
@@ -117,21 +116,21 @@ export class Assignment3 extends Scene {
             starship: new Material(new defs.Phong_Shader(),
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#F0F0F0") }),
             rock: new Material(new defs.Phong_Shader(),
-                {ambient: 1, color: hex_color("#5A5A5A")}),
+                { ambient: 1, color: hex_color("#5A5A5A") }),
             tree_stump: new Material(new defs.Phong_Shader(),
-                {color: hex_color("#8B4513")}),
+                { color: hex_color("#8B4513") }),
             tree_top: new Material(new defs.Phong_Shader(),
-                {color: hex_color("#42692F")}),
+                { color: hex_color("#42692F") }),
             floor: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#90EE90")}),
+                { ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#90EE90") }),
             sky: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#87CEEB")}),
+                { ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#87CEEB") }),
             road: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#777B7E")}),
+                { ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#777B7E") }),
             road_dash: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#FFFF00")}),
+                { ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#FFFF00") }),
             finishLine: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#000000")}),
+                { ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#000000") }),
             bear: new Material(new defs.Phong_Shader(),
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
         }
@@ -145,6 +144,42 @@ export class Assignment3 extends Scene {
         this.tree_positions = [];
         // array for road positions
         this.road_positions = [-40, -18, -12, 12, 18, 40];
+        this.road_spawn_details = [
+            {
+                x: -40,
+                spawnTimes: [1, 5, 9, 13],
+                directions: [1, -1, 1, -1]
+            },
+            {
+                x: -18,
+                spawnTimes: [2, 6, 10, 14],
+                directions: [-1, 1, -1, 1]
+            },
+            {
+                x: -12,
+                spawnTimes: [3, 7, 11, 15],
+                directions: [1, -1, 1, -1]
+            },
+            {
+                x: 12,
+                spawnTimes: [4, 8, 12, 16],
+                directions: [-1, 1, -1, 1]
+            },
+            {
+                x: 18,
+                spawnTimes: [5, 9, 13, 17],
+                directions: [1, -1, 1, -1]
+            },
+            {
+                x: 40,
+                spawnTimes: [6, 10, 14, 18],
+                directions: [-1, 1, -1, 1]
+            }
+        ]
+        const starship_path1 =  { start: vec3(12, 0, -70), end: vec3(12, 0, 70), speed: 0.5 };
+        const starship_path2 = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.4 };
+        const car_path = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.5 };
+        const van_path = { start: vec3(14, 0, 20), end: vec3(14, 0, -10), speed: getRandomDouble(0.3, 0.6) };
 
         // 60 x 40 field
         let field_length = 60;    // horizontal length of field
@@ -153,18 +188,24 @@ export class Assignment3 extends Scene {
         let i = 0;
         let j = 0;
 
+       
+
+
+
+
+
         // randomly populate field with rocks and trees
         // if randomInt = 1 -> rock, 2 -> tree, rest -> blank square
         for (i = -field_length + 4; i <= field_length - 6; i += 2) {    // give bear 2 columns of space with no blocks at start and 3 columns of space at end for finish line
             if (!overlapWithRoad(i, -40, -18, -12, 12, 18, 40)) {
                 for (j = -field_width; j <= field_width; j += 2) {
-                    let randomInt = getRandomInt(1,30);      // gets random int between 1 and 30 (increase range to make field less dense)
+                    let randomInt = getRandomInt(1, 30);      // gets random int between 1 and 30 (increase range to make field less dense)
                     console.log(randomInt)
                     if (randomInt === 1) {
-                        this.rock_positions.push(vec3(i,0,j));      // stores position in rock_positions array
+                        this.rock_positions.push(vec3(i, 0, j));      // stores position in rock_positions array
                     }
                     else if (randomInt === 2) {
-                        this.tree_positions.push(vec3(i,0,j));      // stores position in tree_positions array
+                        this.tree_positions.push(vec3(i, 0, j));      // stores position in tree_positions array
                     }
                 }
             }
@@ -172,13 +213,13 @@ export class Assignment3 extends Scene {
 
 
 
-        const starship_shapes = {
+        this.starship_shapes = {
             body: new defs.Cube(),
             pole: new defs.Capped_Cylinder(4, 4),
             flag: new defs.Square(),
             wheel: new defs.Torus(15, 15)
         };
-        const starship_materials = {
+        this.starship_materials = {
             starship: new Material(new defs.Phong_Shader(), { ambient: 0, diffusivity: 1, color: hex_color("#F0F0F0"), specularity: 1 }),
             body: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: white }),
@@ -190,19 +231,17 @@ export class Assignment3 extends Scene {
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
         };
 
-        const starship_path1 = { start: vec3(-4, 0, -10), end: vec3(-4, 0, 20), speed: getRandomDouble(0.2, 0.8) };
-        const starship_path2 = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: getRandomDouble(0.2, 0.8)};
 
 
-        const van_shapes = {
+        this.van_shapes = {
             body: new defs.Cube(),
             wheel: new defs.Torus(15, 15),
             window: new defs.Cube()
         };
 
-        const van_materials = {
+        this.van_materials = {
             body: new Material(new defs.Phong_Shader(),
-            
+
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color(getRandomColor()) }),
             wheel: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
@@ -210,10 +249,9 @@ export class Assignment3 extends Scene {
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
         };
 
-        const van_path = { start: vec3(14, 0, 20), end: vec3(14, 0, -10), speed: getRandomDouble(0.3, 0.6) };
         const van_direction = vec3(0, -1, 0); // For van going right to left
 
-        const car_shapes = {
+        this.car_shapes = {
             body: new defs.Cube(),
             hood: new defs.Cube(),
             wheel: new defs.Torus(15, 15),
@@ -221,14 +259,14 @@ export class Assignment3 extends Scene {
             window: new defs.Cube()
         };
 
-        const car_materials = {
+        this.car_materials = {
             body: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color(getRandomColor()) }),
             hood: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#FFD580") }),
             wheel: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
-            driverArea: new Material(new defs.Phong_Shader(), 
+            driverArea: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#F0F0F0") }),
             window: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.1, specularity: 0.1, color: hex_color("#000000") }),
@@ -236,23 +274,25 @@ export class Assignment3 extends Scene {
             // Define other materials if needed
         };
 
-        const car_path = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.5 };
         const car_direction = vec3(0, -1, 0);
-        
+
 
         this.vehicle_manager = new VehicleManager();
 
-        const starship1 = new defs.Starship(starship_materials, starship_path1, starship_shapes);
-        const starship2 = new defs.Starship(starship_materials, starship_path2, starship_shapes, vec3(0, 1, 0));
-        const van = new defs.Van(van_materials, van_path, van_shapes, van_direction);
-        const car = new defs.Car(car_materials, car_path, car_shapes, car_direction);
+        const starship1 = new defs.Starship(this.starship_materials, starship_path1, this.starship_shapes, 1, 5, 5);
+        const starship2 = new defs.Starship(this.starship_materials, starship_path2, this.starship_shapes, vec3(0, 1, 0));
+        const van = new defs.Van(this.van_materials, van_path, this.van_shapes, van_direction);
+        const car = new defs.Car(this.car_materials, car_path, this.car_shapes, car_direction);
 
         //this.vehicle_manager.add_vehicle(starship1);
         //this.vehicle_manager.add_vehicle(starship2);
 
-        this.vehicle_manager.add_vehicle(van);
-        this.vehicle_manager.add_vehicle(car);
-        
+        //this.vehicle_manager.add_vehicle(van);
+        //this.vehicle_manager.add_vehicle(car);
+        this.lastSpawnTime12 = 0;  // Initialize last spawn time
+        this.lastSpawnTime18 = 0;  // Initialize last spawn time
+        this.lastSpawnTime40 = 0;  // Initialize last spawn time
+
 
 
         // Add vehicles to the manager
@@ -263,38 +303,41 @@ export class Assignment3 extends Scene {
     }
 
     draw_bear(context, program_state, mt, t) {
-        let angle = this.direction*Math.PI/2; //default front, used to face the bear the correct way
-        let theta = 0.2*Math.sin(4*Math.PI*t); //Arm/leg swing angle
+        let angle = this.direction * Math.PI / 2; //default front, used to face the bear the correct way
+        let theta = 0.2 * Math.sin(4 * Math.PI * t); //Arm/leg swing angle
         mt = mt.times(Mat4.translation(this.x_movement, 0, this.z_movement));
         mt = mt.times(Mat4.rotation(angle, 0, 1, 0)); //Rotate bear to face direction he is walking
 
         this.shapes.bear_body.draw(context, program_state, mt, this.materials.bear);
-        this.shapes.bear_face.draw(context, program_state, mt, this.materials.bear.override({color: hex_color("#000000")}));
-        mt = mt.times(Mat4.rotation(theta,1, 0, 0));
+        this.shapes.bear_face.draw(context, program_state, mt, this.materials.bear.override({ color: hex_color("#000000") }));
+        mt = mt.times(Mat4.rotation(theta, 1, 0, 0));
         this.shapes.bear_limbs1.draw(context, program_state, mt, this.materials.bear);
-        mt = mt.times(Mat4.rotation(-2*theta,1, 0, 0));
+        mt = mt.times(Mat4.rotation(-2 * theta, 1, 0, 0));
         this.shapes.bear_limbs2.draw(context, program_state, mt, this.materials.bear);
     }
     make_control_panel() {
         this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => (this.initial_camera_location));
         this.new_line();
         this.key_triggered_button("Up", ['ArrowUp'], () => {
-            if (this.z_movement >-20) {this.z_movement = this.z_movement - 1;}
+            if (this.z_movement > -20) { this.z_movement = this.z_movement - 1; }
             this.direction = 2;
             this.run = 1;
         });
         this.key_triggered_button("Down", ['ArrowDown'], () => {
-            if (this.z_movement < 20) {this.z_movement = this.z_movement + 1;}
+            if (this.z_movement < 20) { this.z_movement = this.z_movement + 1; }
             this.direction = 0;
-            this.run = 1;});
+            this.run = 1;
+        });
         this.key_triggered_button("Left", ['ArrowLeft'], () => {
-            if (this.x_movement > 0) {this.x_movement = this.x_movement - 1;}
+            if (this.x_movement > 0) { this.x_movement = this.x_movement - 1; }
             this.direction = 3;
-            this.run = 1;});
+            this.run = 1;
+        });
         this.key_triggered_button("Right", ['ArrowRight'], () => {
-            if (this.x_movement < 40) {this.x_movement = this.x_movement + 1;}
+            if (this.x_movement < 40) { this.x_movement = this.x_movement + 1; }
             this.direction = 1;
-            this.run = 1;});
+            this.run = 1;
+        });
     }
 
     display(context, program_state) {
@@ -304,9 +347,11 @@ export class Assignment3 extends Scene {
         }
         const t = program_state.animation_time / 1000; // Current time in seconds
 
+
+
         //Update where camera is looking:
-       /* let camera_location = Mat4.look_at(vec3(this.x_movement, 15, 38), vec3(this.x_movement, 0, 0), vec3(0, 1, 0));
-        program_state.set_camera(camera_location);*/
+        /* let camera_location = Mat4.look_at(vec3(this.x_movement, 15, 38), vec3(this.x_movement, 0, 0), vec3(0, 1, 0));
+         program_state.set_camera(camera_location);*/
 
 
         program_state.projection_transform = Mat4.perspective(
@@ -316,7 +361,6 @@ export class Assignment3 extends Scene {
 
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
-        this.vehicle_manager.update_and_draw(context, program_state);
 
         // draws sky
         this.shapes.sky.draw(context, program_state, Mat4.identity(), this.materials.sky);
@@ -332,17 +376,17 @@ export class Assignment3 extends Scene {
 
         // draws Finish Line
         let finishLine_transform = Mat4.identity()
-            .times(Mat4.translation(58,0,0));  // field_length - 2
+            .times(Mat4.translation(58, 0, 0));  // field_length - 2
         this.shapes.finishLine.draw(context, program_state, finishLine_transform, this.materials.finishLine);
 
 
         //Drawing bear:
         let bear_mt = Mat4.identity();
-        bear_mt = bear_mt.times(Mat4.translation(-20,2,0));
+        bear_mt = bear_mt.times(Mat4.translation(-20, 2, 0));
         let bear_position = vec3(this.x_movement, 0, this.z_movement); // Calculate bear's position
         this.shapes.bear_body.updatePosition(bear_position);
         this.draw_bear(context, program_state, bear_mt, t);
-        
+
         //check for collision
         for (let vehicle of this.vehicle_manager.vehicles) {
             if (typeof vehicle.checkCollision === 'function' && vehicle.checkCollision(this.shapes.bear_body)) {
@@ -362,6 +406,191 @@ export class Assignment3 extends Scene {
             let tree_transform = Mat4.identity().times(Mat4.translation(tree_position[0], tree_position[1], tree_position[2]));
             this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
         }
+
+
+
+
+        const currentTime = program_state.animation_time / 1000; // Convert milliseconds to seconds
+
+        if ((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime12 >= 4) {
+            let st = 12
+            let startVar;
+            let endVar;
+            let startVar2;
+            let endVar2;
+            if(Math.random()<0.5){
+                startVar = vec3(st, 0, -70);
+                endVar = vec3(st, 0, 70);
+                startVar2 = vec3(-1*st, 0, 70);
+                endVar2 = vec3(-1*st, 0, -70);
+            }
+            else{
+                startVar = vec3(st, 0, 70);
+                endVar = vec3(st, 0, -70);
+                startVar2 = vec3(-1*st, 0, -70);
+                endVar2 = vec3(-1*st, 0, 70);
+            }
+            const path = { start: startVar, end: endVar, speed: 0.5 };
+            const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
+            const type = getRandomVehicleType()
+            const type2 = getRandomVehicleType()
+
+            let vehicle;
+            switch (type) {
+                case 'Car':
+                    vehicle = new defs.Car(this.car_materials, path, this.car_shapes, currentTime);
+                    break;
+                case 'Van':
+                    vehicle = new defs.Van(this.van_materials, path, this.van_shapes, currentTime);
+                    break;
+                case 'Starship':
+                    vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
+                    break;
+            }
+            this.vehicle_manager.add_vehicle(vehicle);
+
+            let vehicle2;
+            switch (type2) {
+                case 'Car':
+                    vehicle2 = new defs.Car(this.car_materials, path2, this.car_shapes, currentTime);
+                    break;
+                case 'Van':
+                    vehicle2 = new defs.Van(this.van_materials, path2, this.van_shapes, currentTime);
+                    break;
+                case 'Starship':
+                    vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
+                    break;
+            }
+            this.vehicle_manager.add_vehicle(vehicle2);
+
+
+            this.lastSpawnTime12 = currentTime; // Update last spawn time
+
+        }
+
+        if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime18 >= 4) || ((currentTime > 0.5 && currentTime<0.51) || (currentTime > 1.5 && currentTime<1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2))) {
+            console.log("wrip")
+            let st = 18
+            let startVar;
+            let endVar;
+            let startVar2;
+            let endVar2;
+            if(Math.random()<0.5){
+                startVar = vec3(st, 0, -70);
+                endVar = vec3(st, 0, 70);
+                startVar2 = vec3(-1*st, 0, 70);
+                endVar2 = vec3(-1*st, 0, -70);
+            }
+            else{
+                startVar = vec3(st, 0, 70);
+                endVar = vec3(st, 0, -70);
+                startVar2 = vec3(-1*st, 0, -70);
+                endVar2 = vec3(-1*st, 0, 70);
+            }
+            const path = { start: startVar, end: endVar, speed: 0.5 };
+            const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
+            const type = getRandomVehicleType()
+            const type2 = getRandomVehicleType()
+
+            let vehicle;
+            switch (type) {
+                case 'Car':
+                    vehicle = new defs.Car(this.car_materials, path, this.car_shapes, currentTime);
+                    break;
+                case 'Van':
+                    vehicle = new defs.Van(this.van_materials, path, this.van_shapes, currentTime);
+                    break;
+                case 'Starship':
+                    vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
+                    break;
+            }
+            this.vehicle_manager.add_vehicle(vehicle);
+
+            let vehicle2;
+            switch (type2) {
+                case 'Car':
+                    vehicle2 = new defs.Car(this.car_materials, path2, this.car_shapes, currentTime);
+                    break;
+                case 'Van':
+                    vehicle2 = new defs.Van(this.van_materials, path2, this.van_shapes, currentTime);
+                    break;
+                case 'Starship':
+                    vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
+                    break;
+            }
+            this.vehicle_manager.add_vehicle(vehicle2);
+
+
+            this.lastSpawnTime18 = currentTime; // Update last spawn time
+
+        }
+
+        if ((currentTime > 0.5 && currentTime<0.51) || (currentTime > 1.5 && currentTime<1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2)) {
+            let st = 40
+            let startVar;
+            let endVar;
+            let startVar2;
+            let endVar2;
+            if(Math.random()<0.5){
+                startVar = vec3(st, 0, -60);
+                endVar = vec3(st, 0, 60);
+                startVar2 = vec3(-1*st, 0, 60);
+                endVar2 = vec3(-1*st, 0, -60);
+            }
+            else{
+                startVar = vec3(st, 0, 60);
+                endVar = vec3(st, 0, -60);
+                startVar2 = vec3(-1*st, 0, -60);
+                endVar2 = vec3(-1*st, 0, 60);
+            }
+            const path = { start: startVar, end: endVar, speed: 0.5 };
+            const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
+            const type = getRandomVehicleType()
+            const type2 = getRandomVehicleType()
+
+            let vehicle;
+            switch (type) {
+                case 'Car':
+                    vehicle = new defs.Car(this.car_materials, path, this.car_shapes, currentTime);
+                    break;
+                case 'Van':
+                    vehicle = new defs.Van(this.van_materials, path, this.van_shapes, currentTime);
+                    break;
+                case 'Starship':
+                    vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
+                    break;
+            }
+            this.vehicle_manager.add_vehicle(vehicle);
+
+            let vehicle2;
+            switch (type2) {
+                case 'Car':
+                    vehicle2 = new defs.Car(this.car_materials, path2, this.car_shapes, currentTime);
+                    break;
+                case 'Van':
+                    vehicle2 = new defs.Van(this.van_materials, path2, this.van_shapes, currentTime);
+                    break;
+                case 'Starship':
+                    vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
+                    break;
+            }
+            this.vehicle_manager.add_vehicle(vehicle2);
+
+
+            this.lastSpawnTime40 = currentTime; // Update last spawn time
+
+        }
+        
+
+        
+
+
+
+
+        this.vehicle_manager.update_and_draw(context, program_state);
+
+
+
     }
 }
 
