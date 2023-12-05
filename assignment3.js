@@ -7,7 +7,6 @@ const red = color(1, 0, 0, 1); // Red color, fully opaque
 const white = color(1, 1, 1, 1); // White color, fully opaque
 const grey = color(0.5, 0.5, 0.5, 1);
 
-
 const cooldownDuration = 1; // 1 second
 function getRandomVehicleType() {
     const vehicleTypes = ['Car', 'Van', 'Starship'];
