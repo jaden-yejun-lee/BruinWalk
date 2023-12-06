@@ -79,16 +79,7 @@ function getRandomColor() {
     return hexColors[randomIndex];
 }
 
-// input road translations in road
-function overlapWithRoad(i, ...road_positions) {
-    // return true if road overlaps
-    for (const road of road_positions) {
-        if (i < road + 3 && i > road - 3) {
-            return true;
-        }
-    }
-    return false;
-}
+
 
 // input road translations in road
 function overlapWithRoad(i, ... road_positions) {
@@ -355,12 +346,6 @@ export class Assignment3 extends Scene {
         const starship2 = new defs.Starship(this.starship_materials, starship_path2, this.starship_shapes, vec3(0, 1, 0));
         const van = new defs.Van(this.van_materials, van_path, this.van_shapes, van_direction);
         const car = new defs.Car(this.car_materials, car_path, this.car_shapes, car_direction);
-
-        //this.vehicle_manager.add_vehicle(starship1);
-        //this.vehicle_manager.add_vehicle(starship2);
-
-        //this.vehicle_manager.add_vehicle(van);
-        //this.vehicle_manager.add_vehicle(car);
         this.lastSpawnTime12 = 0;  // Initialize last spawn time
         this.lastSpawnTime18 = 0;  // Initialize last spawn time
         this.lastSpawnTime40 = 0;  // Initialize last spawn time
@@ -786,11 +771,6 @@ export class Assignment3 extends Scene {
             this.lastSpawnTime40 = currentTime; // Update last spawn time
 
         }
-
-
-
-
-
 
 
         this.vehicle_manager.update_and_draw(context, program_state);
