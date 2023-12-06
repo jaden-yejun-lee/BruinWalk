@@ -194,7 +194,7 @@ export class Assignment3 extends Scene {
         // Add vehicles to the manager
 
         // adjusted camera back to get more complete view of field
-        this.initial_camera_location = Mat4.look_at(vec3(0, 15, 40), vec3(0, 0, -80), vec3(0, 1, 0));
+        this.initial_camera_location = Mat4.look_at(vec3(0, 15, 60), vec3(0, 0, -120), vec3(0, 1, 0));
 
     }
 
@@ -203,7 +203,6 @@ export class Assignment3 extends Scene {
         let theta = 0.2*Math.sin(4*Math.PI*t); //Arm/leg swing angle
         mt = mt.times(Mat4.translation(this.x_movement, 0, this.z_movement));
         mt = mt.times(Mat4.rotation(angle, 0, 1, 0)); //Rotate bear to face direction he is walking
-
         this.shapes.bear_body.draw(context, program_state, mt, this.materials.bear);
         this.shapes.bear_face.draw(context, program_state, mt, this.materials.bear.override({color: hex_color("#000000")}));
         mt = mt.times(Mat4.rotation(theta,1, 0, 0));
@@ -245,8 +244,8 @@ export class Assignment3 extends Scene {
         const t_normalized = Math.min(t / total_duration, 1); // Ensure t_normalized is in [0, 1]
         if (t < pause_duration)
             return;
-        const interpolated_position = vec3(t_normalized * (-60), 15, 40);
-        const new_camera_location = Mat4.look_at(interpolated_position, vec3(t_normalized*(-60), 0, -80), vec3(0, 1, 0));
+        const interpolated_position = vec3(t_normalized * (-60), 15, 60);
+        const new_camera_location = Mat4.look_at(interpolated_position, vec3(t_normalized*(-60), 0, -120), vec3(0, 1, 0));
         program_state.set_camera(new_camera_location);
         if (t_normalized == 1)
             this.start_animation++;
@@ -285,9 +284,9 @@ export class Assignment3 extends Scene {
             if (this.end_animation == 1)
                 this.displayEndText(context, program_state, true);
             let cam_z = this.z_movement
-            if (cam_z > 32)
-                cam_z = 32;
-            let camera_location = Mat4.look_at(vec3((this.x_movement - 60), 15, cam_z+40), vec3(this.x_movement - 60, 0, -80), vec3(0, 1, 0));
+            if (cam_z > 13)
+                cam_z = 13;
+            let camera_location = Mat4.look_at(vec3((this.x_movement - 60), 15, cam_z+60), vec3(this.x_movement - 60, 0, -120), vec3(0, 1, 0));
             program_state.set_camera(camera_location);
         }
 
