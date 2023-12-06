@@ -483,300 +483,305 @@ export class Assignment3 extends Scene {
         //Drawing bear:
         let bear_mt = Mat4.identity();
         bear_mt = bear_mt.times(Mat4.translation(-60,2,0));
+        let bear_position = vec3(this.x_movement, 0, this.z_movement); // Calculate bear's position
+        this.shapes.bear_body.updatePosition(bear_position);
         this.draw_bear(context, program_state, bear_mt, t);
+        
+ //check for collision
+ for (let vehicle of this.vehicle_manager.vehicles) {
+    if (typeof vehicle.checkCollision === 'function' && vehicle.checkCollision(this.shapes.bear_body)) {
+        // Handle collision (e.g., end game, reduce health, etc.)
+        throw new Error("Collision detected!");
+        console.log("Collision detected!");
+    }
+}
 
-        //check for collision
-        for (let vehicle of this.vehicle_manager.vehicles) {
-            console.log(vehicle)
-            if (typeof vehicle.checkCollision === 'function' && vehicle.checkCollision(this.shapes.bear_body)) {
-                
-                // Handle collision (e.g., end game, reduce health, etc.)
-                //throw new Error("Collision detected!");
-                console.log("Collision detected!");
+// draws rocks from stored positions in constructor
+for (const rock_position of this.rock_positions) {
+    let rock_transform = Mat4.identity().times(Mat4.translation(rock_position[0], rock_position[1], rock_position[2]));
+    this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
+}
+// draws trees from stored positions in constructor
+for (const tree_position of this.tree_positions) {
+    let tree_transform = Mat4.identity().times(Mat4.translation(tree_position[0], tree_position[1], tree_position[2]));
+    this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
+}
+
+
+
+
+const currentTime = program_state.animation_time / 1000; // Convert milliseconds to seconds
+
+if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime12 >= 4) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2)) {
+    let st = 12
+    let startVar;
+    let endVar;
+    let startVar2;
+    let endVar2;
+    if (Math.random() < 0.5) {
+        startVar = vec3(st, 0, -70);
+        endVar = vec3(st, 0, 70);
+        startVar2 = vec3(-1 * st, 0, 70);
+        endVar2 = vec3(-1 * st, 0, -70);
+    }
+    else {
+        startVar = vec3(st, 0, 70);
+        endVar = vec3(st, 0, -70);
+        startVar2 = vec3(-1 * st, 0, -70);
+        endVar2 = vec3(-1 * st, 0, 70);
+    }
+    const path = { start: startVar, end: endVar, speed: 0.5 };
+    const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
+    const type = getRandomVehicleType()
+    const type2 = getRandomVehicleType()
+
+    let vehicle;
+    let randomNum = getRandomInt(1, 3)
+
+    switch (type) {
+        case 'Car':
+            if (randomNum == 1) {
+                vehicle = new defs.Car(this.redcar_materials, path, this.car_shapes, currentTime);
             }
-        }
-
-        // draws rocks from stored positions in constructor
-        for (const rock_position of this.rock_positions) {
-            let rock_transform = Mat4.identity().times(Mat4.translation(rock_position[0], rock_position[1], rock_position[2]));
-            this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
-        }
-        // draws trees from stored positions in constructor
-        for (const tree_position of this.tree_positions) {
-            let tree_transform = Mat4.identity().times(Mat4.translation(tree_position[0], tree_position[1], tree_position[2]));
-            this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
-        }
-
-
-
-
-        const currentTime = program_state.animation_time / 1000; // Convert milliseconds to seconds
-
-        if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime12 >= 4) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2)) {
-            let st = 12
-            let startVar;
-            let endVar;
-            let startVar2;
-            let endVar2;
-            if (Math.random() < 0.5) {
-                startVar = vec3(st, 0, -70);
-                endVar = vec3(st, 0, 70);
-                startVar2 = vec3(-1 * st, 0, 70);
-                endVar2 = vec3(-1 * st, 0, -70);
-            }
-            else {
-                startVar = vec3(st, 0, 70);
-                endVar = vec3(st, 0, -70);
-                startVar2 = vec3(-1 * st, 0, -70);
-                endVar2 = vec3(-1 * st, 0, 70);
-            }
-            const path = { start: startVar, end: endVar, speed: 0.5 };
-            const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
-            const type = getRandomVehicleType()
-            const type2 = getRandomVehicleType()
-
-            let vehicle;
-            let randomNum = getRandomInt(1, 3)
-
-            switch (type) {
-                case 'Car':
-                    if (randomNum == 1) {
-                        vehicle = new defs.Car(this.redcar_materials, path, this.car_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle = new defs.Car(this.greencar_materials, path, this.car_shapes, currentTime);
-                    }
-                    else {
-                        vehicle = new defs.Car(this.bluecar_materials, path, this.car_shapes, currentTime);
-                    }
-                    break;
-                case 'Van':
-                    if (randomNum == 1) {
-                        vehicle = new defs.Van(this.redvan_materials, path, this.van_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle = new defs.Van(this.greenvan_materials, path, this.van_shapes, currentTime);
-                    }
-                    else {
-                        vehicle = new defs.Van(this.bluevan_materials, path, this.van_shapes, currentTime);
-                    }
-                    break;
-                case 'Starship':
-                    vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
-                    break;
-            }
-            this.vehicle_manager.add_vehicle(vehicle);
-
-            let vehicle2;
-            switch (type2) {
-                case 'Car':
-                    if (randomNum == 1) {
-                        vehicle2 = new defs.Car(this.redcar_materials, path2, this.car_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle2 = new defs.Car(this.greencar_materials, path2, this.car_shapes, currentTime);
-                    }
-                    else {
-                        vehicle2 = new defs.Car(this.bluecar_materials, path2, this.car_shapes, currentTime);
-                    } break;
-                case 'Van':
-                    if (randomNum == 1) {
-                        vehicle2 = new defs.Van(this.redvan_materials, path2, this.van_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle2 = new defs.Van(this.greenvan_materials, path2, this.van_shapes, currentTime);
-                    }
-                    else {
-                        vehicle2 = new defs.Van(this.bluevan_materials, path2, this.van_shapes, currentTime);
-                    }
-                    break;
-                case 'Starship':
-                    vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
-                    break;
-            }
-            this.vehicle_manager.add_vehicle(vehicle2);
-
-
-            this.lastSpawnTime12 = currentTime; // Update last spawn time
-
-        }
-
-        if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime18 >= 4) || ((currentTime > 0.5 && currentTime < 0.51) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2))) {
-            let st = 18
-            let startVar;
-            let endVar;
-            let startVar2;
-            let endVar2;
-            if (Math.random() < 0.5) {
-                startVar = vec3(st, 0, -70);
-                endVar = vec3(st, 0, 70);
-                startVar2 = vec3(-1 * st, 0, 70);
-                endVar2 = vec3(-1 * st, 0, -70);
+            else if (randomNum == 2) {
+                vehicle = new defs.Car(this.greencar_materials, path, this.car_shapes, currentTime);
             }
             else {
-                startVar = vec3(st, 0, 70);
-                endVar = vec3(st, 0, -70);
-                startVar2 = vec3(-1 * st, 0, -70);
-                endVar2 = vec3(-1 * st, 0, 70);
+                vehicle = new defs.Car(this.bluecar_materials, path, this.car_shapes, currentTime);
             }
-            const path = { start: startVar, end: endVar, speed: 0.5 };
-            const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
-            const type = getRandomVehicleType()
-            const type2 = getRandomVehicleType()
-            let randomNum = getRandomInt(1, 3)
-            let vehicle;
-            switch (type) {
-                case 'Car':
-                    if (randomNum == 1) {
-                        vehicle = new defs.Car(this.redcar_materials, path, this.car_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle = new defs.Car(this.greencar_materials, path, this.car_shapes, currentTime);
-                    }
-                    else {
-                        vehicle = new defs.Car(this.bluecar_materials, path, this.car_shapes, currentTime);
-                    } break;
-                case 'Van':
-                    if (randomNum == 1) {
-                        vehicle = new defs.Van(this.redvan_materials, path, this.van_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle = new defs.Van(this.greenvan_materials, path, this.van_shapes, currentTime);
-                    }
-                    else {
-                        vehicle = new defs.Van(this.bluevan_materials, path, this.van_shapes, currentTime);
-                    }
-                    break;
-                case 'Starship':
-                    vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
-                    break;
+            break;
+        case 'Van':
+            if (randomNum == 1) {
+                vehicle = new defs.Van(this.redvan_materials, path, this.van_shapes, currentTime);
             }
-            this.vehicle_manager.add_vehicle(vehicle);
-
-            let vehicle2;
-            switch (type2) {
-                case 'Car':
-                    if (randomNum == 1) {
-                        vehicle2 = new defs.Car(this.redcar_materials, path2, this.car_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle2 = new defs.Car(this.greencar_materials, path2, this.car_shapes, currentTime);
-                    }
-                    else {
-                        vehicle2 = new defs.Car(this.bluecar_materials, path2, this.car_shapes, currentTime);
-                    } break;
-                case 'Van':
-                    if (randomNum == 1) {
-                        vehicle2 = new defs.Van(this.redvan_materials, path2, this.van_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle2 = new defs.Van(this.greenvan_materials, path2, this.van_shapes, currentTime);
-                    }
-                    else {
-                        vehicle2 = new defs.Van(this.bluevan_materials, path2, this.van_shapes, currentTime);
-                    }
-                    break;
-                case 'Starship':
-                    vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
-                    break;
-            }
-            this.vehicle_manager.add_vehicle(vehicle2);
-
-
-            this.lastSpawnTime18 = currentTime; // Update last spawn time
-
-        }
-
-        if ((currentTime > 0.5 && currentTime < 0.51) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2)) {
-            let st = 40
-            let startVar;
-            let endVar;
-            let startVar2;
-            let endVar2;
-            if (Math.random() < 0.5) {
-                startVar = vec3(st, 0, -60);
-                endVar = vec3(st, 0, 60);
-                startVar2 = vec3(-1 * st, 0, 60);
-                endVar2 = vec3(-1 * st, 0, -60);
+            else if (randomNum == 2) {
+                vehicle = new defs.Van(this.greenvan_materials, path, this.van_shapes, currentTime);
             }
             else {
-                startVar = vec3(st, 0, 60);
-                endVar = vec3(st, 0, -60);
-                startVar2 = vec3(-1 * st, 0, -60);
-                endVar2 = vec3(-1 * st, 0, 60);
+                vehicle = new defs.Van(this.bluevan_materials, path, this.van_shapes, currentTime);
             }
-            const path = { start: startVar, end: endVar, speed: 0.5 };
-            const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
-            const type = getRandomVehicleType()
-            const type2 = getRandomVehicleType()
+            break;
+        case 'Starship':
+            vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
+            break;
+    }
+    this.vehicle_manager.add_vehicle(vehicle);
 
-            let vehicle;
-            let randomNum = getRandomInt(1, 3)
-            switch (type) {
-                case 'Car':
-                    if (randomNum == 1) {
-                        vehicle = new defs.Car(this.redcar_materials, path, this.car_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle = new defs.Car(this.greencar_materials, path, this.car_shapes, currentTime);
-                    }
-                    else {
-                        vehicle = new defs.Car(this.bluecar_materials, path, this.car_shapes, currentTime);
-                    } break;
-                case 'Van':
-                    if (randomNum == 1) {
-                        vehicle = new defs.Van(this.redvan_materials, path, this.van_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle = new defs.Van(this.greenvan_materials, path, this.van_shapes, currentTime);
-                    }
-                    else {
-                        vehicle = new defs.Van(this.bluevan_materials, path, this.van_shapes, currentTime);
-                    }
-                    break;
-                case 'Starship':
-                    vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
-                    break;
+    let vehicle2;
+    switch (type2) {
+        case 'Car':
+            if (randomNum == 1) {
+                vehicle2 = new defs.Car(this.redcar_materials, path2, this.car_shapes, currentTime);
             }
-            this.vehicle_manager.add_vehicle(vehicle);
-
-            let vehicle2;
-            switch (type2) {
-                case 'Car':
-                    if (randomNum == 1) {
-                        vehicle2 = new defs.Car(this.redcar_materials, path2, this.car_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle2 = new defs.Car(this.greencar_materials, path2, this.car_shapes, currentTime);
-                    }
-                    else {
-                        vehicle2 = new defs.Car(this.bluecar_materials, path2, this.car_shapes, currentTime);
-                    } break;
-                case 'Van':
-                    if (randomNum == 1) {
-                        vehicle2 = new defs.Van(this.redvan_materials, path2, this.van_shapes, currentTime);
-                    }
-                    else if (randomNum == 2) {
-                        vehicle2 = new defs.Van(this.greenvan_materials, path2, this.van_shapes, currentTime);
-                    }
-                    else {
-                        vehicle2 = new defs.Van(this.bluevan_materials, path2, this.van_shapes, currentTime);
-                    }
-                    break;
-                case 'Starship':
-                    vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
-                    break;
+            else if (randomNum == 2) {
+                vehicle2 = new defs.Car(this.greencar_materials, path2, this.car_shapes, currentTime);
             }
-            this.vehicle_manager.add_vehicle(vehicle2);
+            else {
+                vehicle2 = new defs.Car(this.bluecar_materials, path2, this.car_shapes, currentTime);
+            } break;
+        case 'Van':
+            if (randomNum == 1) {
+                vehicle2 = new defs.Van(this.redvan_materials, path2, this.van_shapes, currentTime);
+            }
+            else if (randomNum == 2) {
+                vehicle2 = new defs.Van(this.greenvan_materials, path2, this.van_shapes, currentTime);
+            }
+            else {
+                vehicle2 = new defs.Van(this.bluevan_materials, path2, this.van_shapes, currentTime);
+            }
+            break;
+        case 'Starship':
+            vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
+            break;
+    }
+    this.vehicle_manager.add_vehicle(vehicle2);
 
 
-            this.lastSpawnTime40 = currentTime; // Update last spawn time
+    this.lastSpawnTime12 = currentTime; // Update last spawn time
 
-        }
+}
+
+if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime18 >= 4) || ((currentTime > 0.5 && currentTime < 0.51) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2))) {
+    console.log("wrip")
+    let st = 18
+    let startVar;
+    let endVar;
+    let startVar2;
+    let endVar2;
+    if (Math.random() < 0.5) {
+        startVar = vec3(st, 0, -70);
+        endVar = vec3(st, 0, 70);
+        startVar2 = vec3(-1 * st, 0, 70);
+        endVar2 = vec3(-1 * st, 0, -70);
+    }
+    else {
+        startVar = vec3(st, 0, 70);
+        endVar = vec3(st, 0, -70);
+        startVar2 = vec3(-1 * st, 0, -70);
+        endVar2 = vec3(-1 * st, 0, 70);
+    }
+    const path = { start: startVar, end: endVar, speed: 0.5 };
+    const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
+    const type = getRandomVehicleType()
+    const type2 = getRandomVehicleType()
+    let randomNum = getRandomInt(1, 3)
+    let vehicle;
+    switch (type) {
+        case 'Car':
+            if (randomNum == 1) {
+                vehicle = new defs.Car(this.redcar_materials, path, this.car_shapes, currentTime);
+            }
+            else if (randomNum == 2) {
+                vehicle = new defs.Car(this.greencar_materials, path, this.car_shapes, currentTime);
+            }
+            else {
+                vehicle = new defs.Car(this.bluecar_materials, path, this.car_shapes, currentTime);
+            } break;
+        case 'Van':
+            if (randomNum == 1) {
+                vehicle = new defs.Van(this.redvan_materials, path, this.van_shapes, currentTime);
+            }
+            else if (randomNum == 2) {
+                vehicle = new defs.Van(this.greenvan_materials, path, this.van_shapes, currentTime);
+            }
+            else {
+                vehicle = new defs.Van(this.bluevan_materials, path, this.van_shapes, currentTime);
+            }
+            break;
+        case 'Starship':
+            vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
+            break;
+    }
+    this.vehicle_manager.add_vehicle(vehicle);
+
+    let vehicle2;
+    switch (type2) {
+        case 'Car':
+            if (randomNum == 1) {
+                vehicle2 = new defs.Car(this.redcar_materials, path2, this.car_shapes, currentTime);
+            }
+            else if (randomNum == 2) {
+                vehicle2 = new defs.Car(this.greencar_materials, path2, this.car_shapes, currentTime);
+            }
+            else {
+                vehicle2 = new defs.Car(this.bluecar_materials, path2, this.car_shapes, currentTime);
+            } break;
+        case 'Van':
+            if (randomNum == 1) {
+                vehicle2 = new defs.Van(this.redvan_materials, path2, this.van_shapes, currentTime);
+            }
+            else if (randomNum == 2) {
+                vehicle2 = new defs.Van(this.greenvan_materials, path2, this.van_shapes, currentTime);
+            }
+            else {
+                vehicle2 = new defs.Van(this.bluevan_materials, path2, this.van_shapes, currentTime);
+            }
+            break;
+        case 'Starship':
+            vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
+            break;
+    }
+    this.vehicle_manager.add_vehicle(vehicle2);
 
 
-        this.vehicle_manager.update_and_draw(context, program_state);
+    this.lastSpawnTime18 = currentTime; // Update last spawn time
 
+}
+
+if ((currentTime > 0.5 && currentTime < 0.51) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2)) {
+    let st = 40
+    let startVar;
+    let endVar;
+    let startVar2;
+    let endVar2;
+    if (Math.random() < 0.5) {
+        startVar = vec3(st, 0, -60);
+        endVar = vec3(st, 0, 60);
+        startVar2 = vec3(-1 * st, 0, 60);
+        endVar2 = vec3(-1 * st, 0, -60);
+    }
+    else {
+        startVar = vec3(st, 0, 60);
+        endVar = vec3(st, 0, -60);
+        startVar2 = vec3(-1 * st, 0, -60);
+        endVar2 = vec3(-1 * st, 0, 60);
+    }
+    const path = { start: startVar, end: endVar, speed: 0.5 };
+    const path2 = { start: startVar2, end: endVar2, speed: 0.5 };
+    const type = getRandomVehicleType()
+    const type2 = getRandomVehicleType()
+
+    let vehicle;
+    let randomNum = getRandomInt(1, 3)
+    switch (type) {
+        case 'Car':
+            if (randomNum == 1) {
+                vehicle = new defs.Car(this.redcar_materials, path, this.car_shapes, currentTime);
+            }
+            else if (randomNum == 2) {
+                vehicle = new defs.Car(this.greencar_materials, path, this.car_shapes, currentTime);
+            }
+            else {
+                vehicle = new defs.Car(this.bluecar_materials, path, this.car_shapes, currentTime);
+            } break;
+        case 'Van':
+            if (randomNum == 1) {
+                vehicle = new defs.Van(this.redvan_materials, path, this.van_shapes, currentTime);
+            }
+            else if (randomNum == 2) {
+                vehicle = new defs.Van(this.greenvan_materials, path, this.van_shapes, currentTime);
+            }
+            else {
+                vehicle = new defs.Van(this.bluevan_materials, path, this.van_shapes, currentTime);
+            }
+            break;
+        case 'Starship':
+            vehicle = new defs.Starship(this.starship_materials, path, this.starship_shapes, currentTime);
+            break;
+    }
+    this.vehicle_manager.add_vehicle(vehicle);
+
+    let vehicle2;
+    switch (type2) {
+        case 'Car':
+            if (randomNum == 1) {
+                vehicle2 = new defs.Car(this.redcar_materials, path2, this.car_shapes, currentTime);
+            }
+            else if (randomNum == 2) {
+                vehicle2 = new defs.Car(this.greencar_materials, path2, this.car_shapes, currentTime);
+            }
+            else {
+                vehicle2 = new defs.Car(this.bluecar_materials, path2, this.car_shapes, currentTime);
+            } break;
+        case 'Van':
+            if (randomNum == 1) {
+                vehicle2 = new defs.Van(this.redvan_materials, path2, this.van_shapes, currentTime);
+            }
+            else if (randomNum == 2) {
+                vehicle2 = new defs.Van(this.greenvan_materials, path2, this.van_shapes, currentTime);
+            }
+            else {
+                vehicle2 = new defs.Van(this.bluevan_materials, path2, this.van_shapes, currentTime);
+            }
+            break;
+        case 'Starship':
+            vehicle2 = new defs.Starship(this.starship_materials, path2, this.starship_shapes, currentTime);
+            break;
+    }
+    this.vehicle_manager.add_vehicle(vehicle2);
+
+
+    this.lastSpawnTime40 = currentTime; // Update last spawn time
+
+}
+
+
+
+
+
+
+
+this.vehicle_manager.update_and_draw(context, program_state);
 
 
     }

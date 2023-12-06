@@ -90,7 +90,7 @@ const Starship = defs.Starship =
                 .times(Mat4.rotation(corrected_angle, 0, 0, 1));
 
             // Offset the center of the bounding sphere
-            this.boundingSphere.center = vec3(new_position[0] + 20, new_position[1], new_position[2]);
+            this.boundingSphere.center = vec3(new_position[0] + 60, new_position[1], new_position[2]);
 
 
             if (Math.abs(this.transform[0][3] - this.path.end[0]) < 10 &&
@@ -194,7 +194,7 @@ const Van = defs.Van =
             this.transform = Mat4.translation(...new_position)
                 .times(Mat4.rotation(corrected_angle, 0, 0, 1));
 
-            this.boundingSphere.center = vec3(new_position[0] + 20, new_position[1], new_position[2]);
+            this.boundingSphere.center = vec3(new_position[0] + 60, new_position[1], new_position[2]);
 
             if (Math.abs(this.transform[0][3] - this.path.end[0]) < 10 &&
             Math.abs(this.transform[1][3] - this.path.end[1]) < 10 &&
@@ -304,7 +304,7 @@ const Car = defs.Car =
             this.transform = Mat4.translation(...new_position)
                 .times(Mat4.rotation(corrected_angle, 0, 0, 1));
 
-                this.boundingSphere.center = vec3(new_position[0] + 20, new_position[1], new_position[2]);
+                this.boundingSphere.center = vec3(new_position[0] + 60, new_position[1], new_position[2]);
             
                 if (Math.abs(this.transform[0][3] - this.path.end[0]) < 10 &&
                 Math.abs(this.transform[1][3] - this.path.end[1]) < 10 &&
