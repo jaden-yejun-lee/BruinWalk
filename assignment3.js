@@ -1,7 +1,8 @@
 import { defs, tiny } from './examples/common.js';
 import { VehicleManager } from './examples/common.js';
+import { Text_Line } from './examples/text-demo.js';
 const {
-    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
+    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
 const red = color(1, 0, 0, 1); // Red color, fully opaque
 const white = color(1, 1, 1, 1); // White color, fully opaque
@@ -89,6 +90,17 @@ function overlapWithRoad(i, ...road_positions) {
     return false;
 }
 
+// input road translations in road
+function overlapWithRoad(i, ... road_positions) {
+    // return true if road overlaps
+    for (const road of road_positions) {
+        if (i < road + 3 && i > road - 3) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 export class Assignment3 extends Scene {
     constructor() {
@@ -106,7 +118,7 @@ export class Assignment3 extends Scene {
             bear_face: new defs.Bear_Face(),
             bear_limbs1: new defs.Bear_Limbs1(),
             bear_limbs2: new defs.Bear_Limbs2(),
-
+            text: new Text_Line(35),
         };
 
         // *** Materials
@@ -128,18 +140,27 @@ export class Assignment3 extends Scene {
             road: new Material(new defs.Phong_Shader(),
                 { ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#777B7E") }),
             road_dash: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#FFFF00") }),
+                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#FFFF00")}),
             finishLine: new Material(new defs.Phong_Shader(),
-                { ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#000000") }),
+                {ambient: 1, diffusivity: 0.5, specularity: 1, color: hex_color("#000000")}),
             bear: new Material(new defs.Phong_Shader(),
                 { ambient: 0.5, diffusivity: 0.5, color: hex_color("#954535") }),
         }
+        const texture = new defs.Textured_Phong(1);
+        this.text_image = new Material(texture, {
+            ambient: 1, diffusivity: 0, specularity: 0,
+            texture: new Texture("assets/text.png")
+        });
+
+        // 60 x 40 field
+        let field_length = 60;    // horizontal length of field
+        let field_width = 40;     // vertical width of field
 
         this.direction = 1;
         this.x_movement = 0; //x movement is bound by 0 to 2*x-width of screen
         this.z_movement = 0; //z movement is bound by -z-width to +z-width of screen
-        this.camera_dx = 0;
-
+        this.start_animation = 0; //Flag for when to show start screen, when to pan to game
+        this.end_animation = 0;
         this.rock_positions = [];
         this.tree_positions = [];
         // array for road positions
@@ -185,6 +206,7 @@ export class Assignment3 extends Scene {
         let field_length = 60;    // horizontal length of field
         let field_width = 40;     // vertical width of field
 
+
         let i = 0;
         let j = 0;
 
@@ -199,21 +221,19 @@ export class Assignment3 extends Scene {
         for (i = -field_length + 4; i <= field_length - 6; i += 2) {    // give bear 2 columns of space with no blocks at start and 3 columns of space at end for finish line
             if (!overlapWithRoad(i, -40, -18, -12, 12, 18, 40)) {
                 for (j = -field_width; j <= field_width; j += 2) {
-                    let randomInt = getRandomInt(1, 30);      // gets random int between 1 and 30 (increase range to make field less dense)
+                    let randomInt = getRandomInt(1,30);      // gets random int between 1 and 30 (increase range to make field less dense)
                     console.log(randomInt)
                     if (randomInt === 1) {
-                        this.rock_positions.push(vec3(i, 0, j));      // stores position in rock_positions array
+                        this.rock_positions.push(vec3(i,0,j));      // stores position in rock_positions array
                     }
                     else if (randomInt === 2) {
-                        this.tree_positions.push(vec3(i, 0, j));      // stores position in tree_positions array
+                        this.tree_positions.push(vec3(i,0,j));      // stores position in tree_positions array
                     }
                 }
             }
         }
 
-
-
-        this.starship_shapes = {
+        const starship_shapes = {
             body: new defs.Cube(),
             pole: new defs.Capped_Cylinder(4, 4),
             flag: new defs.Square(),
@@ -349,11 +369,10 @@ export class Assignment3 extends Scene {
         this.lastSpawnTime40 = 0;  // Initialize last spawn time
 
 
-
         // Add vehicles to the manager
 
         // adjusted camera back to get more complete view of field
-        this.initial_camera_location = Mat4.look_at(vec3(0, 15, 38), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.initial_camera_location = Mat4.look_at(vec3(0, 15, 60), vec3(0, 0, -120), vec3(0, 1, 0));
 
     }
 
@@ -362,7 +381,6 @@ export class Assignment3 extends Scene {
         let theta = 0.2 * Math.sin(4 * Math.PI * t); //Arm/leg swing angle
         mt = mt.times(Mat4.translation(this.x_movement, 0, this.z_movement));
         mt = mt.times(Mat4.rotation(angle, 0, 1, 0)); //Rotate bear to face direction he is walking
-
         this.shapes.bear_body.draw(context, program_state, mt, this.materials.bear);
         this.shapes.bear_face.draw(context, program_state, mt, this.materials.bear.override({ color: hex_color("#000000") }));
         mt = mt.times(Mat4.rotation(theta, 1, 0, 0));
@@ -371,51 +389,94 @@ export class Assignment3 extends Scene {
         this.shapes.bear_limbs2.draw(context, program_state, mt, this.materials.bear);
     }
     make_control_panel() {
-        this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => (this.initial_camera_location));
-        this.new_line();
+        this.key_triggered_button("Play Game", ["p"], () => {this.start_animation++;});
         this.key_triggered_button("Up", ['ArrowUp'], () => {
-            if (this.z_movement > -20) { this.z_movement = this.z_movement - 1; }
-            this.direction = 2;
-            this.run = 1;
-        });
+            if (this.z_movement > -40) {this.z_movement = this.z_movement - 1;}
+            this.direction = 2;});
         this.key_triggered_button("Down", ['ArrowDown'], () => {
-            if (this.z_movement < 20) { this.z_movement = this.z_movement + 1; }
-            this.direction = 0;
-            this.run = 1;
-        });
+            if (this.z_movement < 40) {this.z_movement = this.z_movement + 1;}
+            this.direction = 0;});
         this.key_triggered_button("Left", ['ArrowLeft'], () => {
-            if (this.x_movement > 0) { this.x_movement = this.x_movement - 1; }
-            this.direction = 3;
-            this.run = 1;
-        });
+            if (this.x_movement > 0) {this.x_movement = this.x_movement - 1;}
+            this.direction = 3;});
         this.key_triggered_button("Right", ['ArrowRight'], () => {
-            if (this.x_movement < 40) { this.x_movement = this.x_movement + 1; }
-            this.direction = 1;
-            this.run = 1;
-        });
+            if (this.x_movement < 120) {this.x_movement = this.x_movement + 1;}
+            this.direction = 1;});
+    }
+    displayStartText(context, program_state) {
+        let strings = ["BruinWalk", "Press 'P' to Start"]
+        let text_location = Mat4.identity().times(Mat4.translation(-11,20,-10));
+        program_state.set_camera(this.initial_camera_location);
+        for (let line of strings) {
+            this.shapes.text.set_string(line, context.context);
+            this.shapes.text.draw(context, program_state, text_location.times(Mat4.scale(1.7,1.7,1.7)), this.text_image);
+            text_location.post_multiply(Mat4.translation(-10, -5, 0));
+        }
     }
 
-    display(context, program_state) {
-        if (!context.scratchpad.controls) {
-            this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
-            program_state.set_camera(this.initial_camera_location);
+    pan_over(program_state) {
+        const pause_duration = 1;  // Pause duration in seconds
+        const animation_duration = 6;  // Duration of the camera pan
+        const total_duration = pause_duration + animation_duration;  // Total duration including pause
+        const t = program_state.animation_time / 1000; // Current time in seconds
+        const t_normalized = Math.min(t / total_duration, 1); // Ensure t_normalized is in [0, 1]
+        if (t < pause_duration)
+            return;
+        const interpolated_position = vec3(t_normalized * (-60), 15, 60);
+        const new_camera_location = Mat4.look_at(interpolated_position, vec3(t_normalized*(-60), 0, -120), vec3(0, 1, 0));
+        program_state.set_camera(new_camera_location);
+        if (t_normalized == 1)
+            this.start_animation++;
+    }
+
+    displayEndText(context, program_state, win) {
+        let text_location = Mat4.identity().times(Mat4.translation(-68 + this.x_movement,20,-10));
+        let percent_completed = (this.x_movement/120)*100;
+        percent_completed = percent_completed.toFixed(0);
+        let game_over_text = "You lost!";
+        if (win) {game_over_text = "You won!";
+        percent_completed = 100;}
+        this.shapes.text.set_string(game_over_text, context.context);
+        this.shapes.text.draw(context, program_state, text_location.times(Mat4.scale(1.7,1.7,1.7)), this.text_image);
+        text_location.post_multiply(Mat4.translation(-17, -5, 0));
+        let completion_msg = `You crossed ${percent_completed}% of the field`
+        this.shapes.text.set_string(completion_msg, context.context);
+        this.shapes.text.draw(context, program_state, text_location.times(Mat4.scale(1.3,1.3,1.3)), this.text_image);
         }
+
+
+    display(context, program_state) {
+        program_state.lights = [new Light(vec4(3, 2, 1, 0), color(1, 1, 1, 1), 1000000),
+            new Light(vec4(3, 10, 10, 1), color(1, .7, .7, 1), 100000)];
+
         const t = program_state.animation_time / 1000; // Current time in seconds
 
-
-
-        //Update where camera is looking:
-        /* let camera_location = Mat4.look_at(vec3(this.x_movement, 15, 38), vec3(this.x_movement, 0, 0), vec3(0, 1, 0));
-         program_state.set_camera(camera_location);*/
+        if (this.x_movement > 117) //If finish line is reached, play end animation
+            this.end_animation = 1;
+        //Update where camera is looking to follow the bear:
+        if(this.start_animation == 0)
+           this.displayStartText(context, program_state);
+        else if(this.start_animation == 1)
+            this.pan_over(program_state);
+        else {
+            if (this.end_animation == 1)
+                this.displayEndText(context, program_state, true);
+            let cam_z = this.z_movement
+            if (cam_z > 13)
+                cam_z = 13;
+            let camera_location = Mat4.look_at(vec3((this.x_movement - 60), 15, cam_z+60), vec3(this.x_movement - 60, 0, -120), vec3(0, 1, 0));
+            program_state.set_camera(camera_location);
+        }
 
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
 
-        let model_transform = Mat4.identity();
-
         const light_pos = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_pos, color(1, 1, 1, 1), 1000)];
+
+        // draws sky
+        this.shapes.sky.draw(context, program_state, Mat4.identity(), this.materials.sky);
 
         // draws sky
         this.shapes.sky.draw(context, program_state, Mat4.identity(), this.materials.sky);
@@ -432,14 +493,13 @@ export class Assignment3 extends Scene {
         // draws Finish Line
         let finishLine_transform = Mat4.identity()
             .times(Mat4.translation(58, 0, 0));  // field_length - 2
+
         this.shapes.finishLine.draw(context, program_state, finishLine_transform, this.materials.finishLine);
 
 
         //Drawing bear:
         let bear_mt = Mat4.identity();
-        bear_mt = bear_mt.times(Mat4.translation(-20, 2, 0));
-        let bear_position = vec3(this.x_movement, 0, this.z_movement); // Calculate bear's position
-        this.shapes.bear_body.updatePosition(bear_position);
+        bear_mt = bear_mt.times(Mat4.translation(-60,2,0));
         this.draw_bear(context, program_state, bear_mt, t);
 
         //check for collision

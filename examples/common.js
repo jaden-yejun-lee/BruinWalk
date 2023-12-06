@@ -682,8 +682,8 @@ const Road = defs.Road =
                 // first dash
                 if (i === 0) {
                     dash_transform = dash_transform
-                        .times(Mat4.translation(0, -0.99, 0))      // minor edit so objects can be directly placed on top of road
-                        .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))     // rotates road to be flat
+                        .times(Mat4.translation(0,-0.99,0))
+                        .times(Mat4.rotation(Math.PI / 2, 1, 0, 0))
                         .times(Mat4.scale(0.25, 3, 0.1))
                         .times(Mat4.translation(0,-12,0)) // edit starting point of first dash
                 }
