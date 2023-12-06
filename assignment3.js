@@ -16,8 +16,8 @@ const streets = [
 ];
 const cooldownDuration = 1; // 1 second
 function getRandomVehicleType() {
-    const vehicleTypes = ['Car']
-    //const vehicleTypes = ['Car', 'Van', 'Starship'];
+    //const vehicleTypes = ['Car']
+    const vehicleTypes = ['Car', 'Van', 'Starship'];
     const randomIndex = Math.floor(Math.random() * vehicleTypes.length);
     return vehicleTypes[randomIndex];
 }
