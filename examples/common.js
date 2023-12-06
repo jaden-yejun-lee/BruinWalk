@@ -102,6 +102,7 @@ const Starship = defs.Starship =
         }
         checkCollision(otherObject) {
             const distance = this.boundingSphere.center.minus(otherObject.boundingSphere.center).norm();
+            console.log("checking")
             return distance <= (this.boundingSphere.radius + otherObject.boundingSphere.radius);
         }
 
@@ -292,7 +293,6 @@ const Car = defs.Car =
             let t = currT - this.creationTime
             // Update car position based on the path and time
             const position_along_path = (t * this.path.speed) % 1;
-            console.log(position_along_path)
             const new_position = this.path.start.mix(this.path.end, position_along_path);
 
             // Calculate the orientation of the car based on the direction of travel.

@@ -16,7 +16,8 @@ const streets = [
 ];
 const cooldownDuration = 1; // 1 second
 function getRandomVehicleType() {
-    const vehicleTypes = ['Car', 'Van', 'Starship'];
+    const vehicleTypes = ['Car']
+    //const vehicleTypes = ['Car', 'Van', 'Starship'];
     const randomIndex = Math.floor(Math.random() * vehicleTypes.length);
     return vehicleTypes[randomIndex];
 }
@@ -210,7 +211,6 @@ export class Assignment3 extends Scene {
             if (!overlapWithRoad(i, -40, -18, -12, 12, 18, 40)) {
                 for (j = -field_width; j <= field_width; j += 2) {
                     let randomInt = getRandomInt(1,30);      // gets random int between 1 and 30 (increase range to make field less dense)
-                    console.log(randomInt)
                     if (randomInt === 1) {
                         this.rock_positions.push(vec3(i,0,j));      // stores position in rock_positions array
                     }
@@ -221,7 +221,7 @@ export class Assignment3 extends Scene {
             }
         }
 
-        const starship_shapes = {
+        this.starship_shapes = {
             body: new defs.Cube(),
             pole: new defs.Capped_Cylinder(4, 4),
             flag: new defs.Square(),
@@ -385,6 +385,7 @@ export class Assignment3 extends Scene {
             if (this.x_movement < 120) {this.x_movement = this.x_movement + 1;}
             this.direction = 1;});
     }
+
     displayStartText(context, program_state) {
         let strings = ["BruinWalk", "Press 'P' to Start"]
         let text_location = Mat4.identity().times(Mat4.translation(-11,20,-10));
@@ -486,9 +487,11 @@ export class Assignment3 extends Scene {
 
         //check for collision
         for (let vehicle of this.vehicle_manager.vehicles) {
+            console.log(vehicle)
             if (typeof vehicle.checkCollision === 'function' && vehicle.checkCollision(this.shapes.bear_body)) {
+                
                 // Handle collision (e.g., end game, reduce health, etc.)
-                throw new Error("Collision detected!");
+                //throw new Error("Collision detected!");
                 console.log("Collision detected!");
             }
         }
@@ -599,7 +602,6 @@ export class Assignment3 extends Scene {
         }
 
         if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime18 >= 4) || ((currentTime > 0.5 && currentTime < 0.51) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2))) {
-            console.log("wrip")
             let st = 18
             let startVar;
             let endVar;
