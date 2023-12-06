@@ -202,9 +202,6 @@ export class Assignment3 extends Scene {
         const car_path = { start: vec3(4, 0, 20), end: vec3(4, 0, -10), speed: 0.5 };
         const van_path = { start: vec3(14, 0, 20), end: vec3(14, 0, -10), speed: getRandomDouble(0.3, 0.6) };
 
-        // 60 x 40 field
-        let field_length = 60;    // horizontal length of field
-        let field_width = 40;     // vertical width of field
 
 
         let i = 0;
