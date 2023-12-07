@@ -152,7 +152,8 @@ export class Assignment3 extends Scene {
         this.x_movement = 0; //x movement is bound by 0 to 2*x-width of screen
         this.z_movement = 0; //z movement is bound by -z-width to +z-width of screen
         this.start_animation = 0; //Flag for when to show start screen, when to pan to game
-        this.end_animation = 0;
+        this.end_animation = false;
+        this.game_win = true;
         this.rock_positions = [];
         this.tree_positions = [];
         // array for road positions
@@ -370,31 +371,90 @@ export class Assignment3 extends Scene {
         mt = mt.times(Mat4.rotation(-2 * theta, 1, 0, 0));
         this.shapes.bear_limbs2.draw(context, program_state, mt, this.materials.bear);
     }
+    constrain_movement(dir){
+        let x_pos = this.x_movement - 60;
+        for (const rock_position of this.rock_positions) {
+            let rock_x_pos = rock_position[0];
+            let rock_z_pos = rock_position[2];
+            switch (dir) {
+                case '+x':
+                    if(rock_x_pos > x_pos && Math.abs(rock_z_pos - this.z_movement) <= 1 && Math.abs(x_pos - rock_x_pos) < 1.5)
+                        return false;
+                    break;
+                case '-x':
+                    if(rock_x_pos < x_pos && Math.abs(rock_z_pos - this.z_movement) <= 1 && Math.abs(x_pos - rock_x_pos) < 1.5)
+                        return false;
+                    break;
+                case '+z':
+                    if(rock_z_pos > this.z_movement && Math.abs(rock_x_pos - x_pos) <= 1 && Math.abs(this.z_movement - rock_z_pos) < 1.5)
+                        return false;
+                    break;
+                case '-z':
+                    if(rock_z_pos < this.z_movement && Math.abs(rock_x_pos - x_pos) <= 1 && Math.abs(this.z_movement - rock_z_pos) < 1.5)
+                        return false;
+                    break;
+            }
+        }
+        for (const tree_position of this.tree_positions) {
+            let tree_x_pos = tree_position[0];
+            let tree_z_pos = tree_position[2];
+            switch (dir) {
+                case '+x':
+                    if(tree_x_pos > x_pos && Math.abs(tree_z_pos - this.z_movement) <= 1 && Math.abs(x_pos - tree_x_pos) < 1.5)
+                        return false;
+                    break;
+                case '-x':
+                    if(tree_x_pos < x_pos && Math.abs(tree_z_pos - this.z_movement) <= 1 && Math.abs(x_pos - tree_x_pos) < 1.5)
+                        return false;
+                    break;
+                case '+z':
+                    if(tree_z_pos > this.z_movement && Math.abs(tree_x_pos - x_pos) <= 1 && Math.abs(this.z_movement - tree_z_pos) < 1.5)
+                        return false;
+                    break;
+                case '-z':
+                    if(tree_z_pos < this.z_movement && Math.abs(tree_x_pos - x_pos) <= 1 && Math.abs(this.z_movement - tree_z_pos) < 1.5)
+                        return false;
+                    break;
+            }
+        }
+        return true;
+    }
     make_control_panel() {
         this.key_triggered_button("Play Game", ["p"], () => {this.start_animation++;});
         this.key_triggered_button("Up", ['ArrowUp'], () => {
-            if (this.z_movement > -40) {this.z_movement = this.z_movement - 1;}
-            this.direction = 2;});
+            if (!this.end_animation) {
+            if (this.z_movement > -40) {this.z_movement--;}
+            if (!this.constrain_movement('-z')) {this.z_movement++;}
+            this.direction = 2;}});
         this.key_triggered_button("Down", ['ArrowDown'], () => {
-            if (this.z_movement < 40) {this.z_movement = this.z_movement + 1;}
-            this.direction = 0;});
+            if (!this.end_animation) {
+            if (this.z_movement < 40) {this.z_movement++;}
+            if (!this.constrain_movement('+z')) {this.z_movement--;}
+            this.direction = 0;}});
         this.key_triggered_button("Left", ['ArrowLeft'], () => {
-            if (this.x_movement > 0) {this.x_movement = this.x_movement - 1;}
-            this.direction = 3;});
+            if (!this.end_animation) {
+            if (this.x_movement > 0) {this.x_movement--;}
+            if (!this.constrain_movement('-x')) {this.x_movement++;}
+            this.direction = 3;}});
         this.key_triggered_button("Right", ['ArrowRight'], () => {
-            if (this.x_movement < 120) {this.x_movement = this.x_movement + 1;}
-            this.direction = 1;});
+            if (!this.end_animation) {
+            if (this.x_movement < 120) {this.x_movement++;}
+            if (!this.constrain_movement('+x')) {this.x_movement--;}
+            this.direction = 1;}});
     }
 
     displayStartText(context, program_state) {
-        let strings = ["BruinWalk", "Press 'P' to Start"]
-        let text_location = Mat4.identity().times(Mat4.translation(-11,20,-10));
+        let strings = ["BruinWalk", "Press 'P' to Start", "Use Arrow Keys to Move"]
+        let text_location = Mat4.identity().times(Mat4.translation(-8,23,-10));
         program_state.set_camera(this.initial_camera_location);
-        for (let line of strings) {
-            this.shapes.text.set_string(line, context.context);
-            this.shapes.text.draw(context, program_state, text_location.times(Mat4.scale(1.7,1.7,1.7)), this.text_image);
-            text_location.post_multiply(Mat4.translation(-10, -5, 0));
-        }
+        this.shapes.text.set_string(strings[0], context.context);
+        this.shapes.text.draw(context, program_state, text_location.times(Mat4.scale(1.7,1.7,1.7)), this.text_image);
+        text_location.post_multiply(Mat4.translation(-12, -5, 0));
+        this.shapes.text.set_string(strings[1], context.context);
+        this.shapes.text.draw(context, program_state, text_location.times(Mat4.scale(1.7,1.7,1.7)), this.text_image);
+        text_location.post_multiply(Mat4.translation(7, -5, 0));
+        this.shapes.text.set_string(strings[2], context.context);
+        this.shapes.text.draw(context, program_state, text_location, this.text_image);
     }
 
     pan_over(program_state) {
@@ -413,7 +473,7 @@ export class Assignment3 extends Scene {
     }
 
     displayEndText(context, program_state, win) {
-        let text_location = Mat4.identity().times(Mat4.translation(-68 + this.x_movement,20,-10));
+        let text_location = Mat4.identity().times(Mat4.translation(-68 + this.x_movement,15,-10));
         let percent_completed = (this.x_movement/120)*100;
         percent_completed = percent_completed.toFixed(0);
         let game_over_text = "You lost!";
@@ -435,15 +495,15 @@ export class Assignment3 extends Scene {
         const t = program_state.animation_time / 1000; // Current time in seconds
 
         if (this.x_movement > 117) //If finish line is reached, play end animation
-            this.end_animation = 1;
+            this.end_animation = true;
         //Update where camera is looking to follow the bear:
         if(this.start_animation == 0)
            this.displayStartText(context, program_state);
         else if(this.start_animation == 1)
             this.pan_over(program_state);
         else {
-            if (this.end_animation == 1)
-                this.displayEndText(context, program_state, true);
+            if (this.end_animation)
+                this.displayEndText(context, program_state, this.game_win);
             let cam_z = this.z_movement
             if (cam_z > 13)
                 cam_z = 13;
@@ -491,7 +551,8 @@ export class Assignment3 extends Scene {
  for (let vehicle of this.vehicle_manager.vehicles) {
     if (typeof vehicle.checkCollision === 'function' && vehicle.checkCollision(this.shapes.bear_body)) {
         // Handle collision (e.g., end game, reduce health, etc.)
-        throw new Error("Collision detected!");
+        this.end_animation = true;
+        this.game_win = false;
         console.log("Collision detected!");
     }
 }
@@ -501,12 +562,12 @@ for (const rock_position of this.rock_positions) {
     let rock_transform = Mat4.identity().times(Mat4.translation(rock_position[0], rock_position[1], rock_position[2]));
     this.shapes.rock.draw(context, program_state, rock_transform, this.materials.rock);
 }
+
 // draws trees from stored positions in constructor
 for (const tree_position of this.tree_positions) {
     let tree_transform = Mat4.identity().times(Mat4.translation(tree_position[0], tree_position[1], tree_position[2]));
     this.shapes.tree.draw(context, program_state, tree_transform, this.materials.tree_stump, this.materials.tree_top);
 }
-
 
 
 
