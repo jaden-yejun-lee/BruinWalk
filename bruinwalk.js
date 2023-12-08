@@ -553,7 +553,6 @@ export class Bruinwalk_Main_Program extends Scene {
         // Handle collision (e.g., end game, reduce health, etc.)
         this.end_animation = true;
         this.game_win = false;
-        console.log("Collision detected!");
     }
 }
 
@@ -663,7 +662,6 @@ if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - 
 }
 
 if (((currentTime >= 0.5) && Math.floor(currentTime) % 3 === 0 && currentTime - this.lastSpawnTime18 >= 4) || ((currentTime > 0.5 && currentTime < 0.51) || (currentTime > 1.5 && currentTime < 1.51) || ((currentTime >= 0.5) && Math.floor(currentTime) % 2 === 0 && currentTime - this.lastSpawnTime40 >= 2))) {
-    console.log("wrip")
     let st = 18
     let startVar;
     let endVar;
