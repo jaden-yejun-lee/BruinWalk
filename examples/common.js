@@ -102,7 +102,6 @@ const Starship = defs.Starship =
         }
         checkCollision(otherObject) {
             const distance = this.boundingSphere.center.minus(otherObject.boundingSphere.center).norm();
-            console.log("checking")
             return distance <= (this.boundingSphere.radius + otherObject.boundingSphere.radius);
         }
 
