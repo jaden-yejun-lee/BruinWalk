@@ -31,6 +31,6 @@ Bruinwalk is a 3D animated game. You, the player, are a bear trying to cross a b
   - Right Arrow: Move right
  
 ## Instructions for running locally
-- for Mac OS, type the following command in the terminal: ./host.command. Make sure your python version matches that of the version written in host.command, e.g. "python" or "python3".
-- for Windows, use Webstorm to run index.html. 
+- For Mac OS, type the following command in the terminal: ./host.command. Make sure your python version matches that of the version written in host.command, e.g. "python" or "python3".
+- For Windows, use Webstorm to run index.html. 
 
